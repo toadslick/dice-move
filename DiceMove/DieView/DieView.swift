@@ -22,6 +22,6 @@ struct DieView: UIViewControllerRepresentable, DieController.Delegate {
     }
     
     func dieDidStopAtValue(_ value: Int) {
-        
+        print("You rolled a \(value)")
     }
 }
