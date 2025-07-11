@@ -53,7 +53,7 @@ class DieController: UIViewController, SCNSceneRendererDelegate {
         sceneView = (self.view as! SCNView)
         sceneView.delegate = self
         sceneView.autoenablesDefaultLighting = true
-        sceneView.backgroundColor = UIColor.black
+        sceneView.backgroundColor = UIColor.clear
         sceneView.contentMode = .center
         sceneView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(tapAction)))
 
@@ -220,9 +220,6 @@ class DieController: UIViewController, SCNSceneRendererDelegate {
             guard dieState == .holding else { return }
             dieState = .rolling
             delegate?.dieDidBeginRoll()
-            if (dieNode.particleSystems ?? []).isEmpty {
-                dieNode.addParticleSystem(emitter)
-            }
             let velocity = recognizer.velocity(in: sceneView)
             var vx = Float(velocity.x)
             var vy = Float(velocity.y)
@@ -243,6 +240,9 @@ class DieController: UIViewController, SCNSceneRendererDelegate {
                 .random(in: minTorque...maxTorque)
             ), asImpulse: true)
             
+            if (dieNode.particleSystems ?? []).isEmpty {
+                dieNode.addParticleSystem(emitter)
+            }
         default:
             ()
         }
@@ -270,5 +270,4 @@ class DieController: UIViewController, SCNSceneRendererDelegate {
         }).first!
         return dieFaceNodes.firstIndex(of: upwardFaceNode)! + 1
     }
-
 }
