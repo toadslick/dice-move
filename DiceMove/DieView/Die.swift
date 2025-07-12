@@ -108,8 +108,8 @@ class Die: NSObject {
         dieNode.physicsBody!.applyForce(.init(vx, 0, vy), asImpulse: false)
 
         // Apply a random angular force
-        let minTorque = 0
-        let maxTorque = 1
+        let minTorque = 0.05
+        let maxTorque = 0.5
         dieNode.physicsBody!.applyTorque(.init(
             .random(in: minTorque...maxTorque),
             .random(in: minTorque...maxTorque),

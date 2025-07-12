@@ -122,7 +122,7 @@ class DieController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         
         for touch in touches {
             let position = viewPointToScene(touch.location(in: sceneView))
-            let die = Die(in: rootNode, assetName: "die", particleName: "sparkles")
+            let die = Die(in: rootNode, assetName: "Default", particleName: "Default")
             die.delegate = self
             dice.insert(die)
             heldDice[touch] = die
