@@ -1,11 +1,11 @@
 import SwiftUI
 import SceneKit
 
-struct DieView: UIViewControllerRepresentable, DieController.Delegate {
-    
+struct DieView: UIViewControllerRepresentable, Die.Delegate {
+
     func makeUIViewController(context: Context) -> DieController {
         let dc = DieController()
-        dc.delegate = self
+        dc.dieDelegate = self
         return dc
     }
     
@@ -13,15 +13,7 @@ struct DieView: UIViewControllerRepresentable, DieController.Delegate {
         
     }
     
-    func dieDidBeginRoll() {
-        
-    }
-    
-    func dieDidBeginHold() {
-        
-    }
-    
-    func dieDidStopAtValue(_ value: Int) {
+    func die(_ die: Die, didStopOnValue value: Int) {
         print("You rolled a \(value)")
     }
 }
