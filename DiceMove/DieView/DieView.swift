@@ -2,6 +2,8 @@ import SwiftUI
 import SceneKit
 
 struct DieView: UIViewControllerRepresentable, Die.Delegate {
+ 
+    @AppStorage("money") private var money: Int = 0
 
     func makeUIViewController(context: Context) -> DieController {
         let dc = DieController()
@@ -14,6 +16,6 @@ struct DieView: UIViewControllerRepresentable, Die.Delegate {
     }
     
     func die(_ die: Die, didStopOnValue value: Int) {
-        print("You rolled a \(value)")
+        money += value
     }
 }
