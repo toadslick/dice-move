@@ -1,0 +1,23 @@
+{
+    "backgrounds": [
+        {
+            "asset": "Default",
+            "title": "Default",
+            "rarity": null
+        },
+    ],
+    "dice": [
+        {
+            "asset": "Default",
+            "title": "Default",
+            "rarity": null
+        },
+    ],
+    "particles": [
+        {
+            "asset": "Default",
+            "title": "Default",
+            "rarity": null
+        },
+    ]
+}
