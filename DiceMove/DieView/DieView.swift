@@ -1,21 +1,25 @@
 import SwiftUI
 import SceneKit
 
-struct DieView: UIViewControllerRepresentable, Die.Delegate {
- 
+struct DieView: UIViewControllerRepresentable, DiceController.Delegate {
+    
     @AppStorage("money") private var money: Int = 0
-
-    func makeUIViewController(context: Context) -> DieController {
-        let dc = DieController()
+    
+    func makeUIViewController(context: Context) -> DiceController {
+        let dc = DiceController()
         dc.dieDelegate = self
         return dc
     }
     
-    func updateUIViewController(_ uiViewController: DieController, context: Context) {
+    func updateUIViewController(_ uiViewController: DiceController, context: Context) {
         
     }
     
     func die(_ die: Die, didStopOnValue value: Int) {
         money += value
+    }
+    
+    func dice(didChange dice: Set<Die>, maxDice: Int) {
+        
     }
 }

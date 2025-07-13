@@ -3,7 +3,11 @@ import QuartzCore
 import SceneKit
 import SceneKit.ModelIO
 
-class DieController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
+class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
+    
+    protocol Delegate: Die.Delegate {
+        func dice(didChange dice: Set<Die>, maxDice: Int)
+    }
     
     private static let maxDice = 5
     
