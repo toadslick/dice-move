@@ -9,7 +9,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         func dice(didChange dice: Set<Die>, maxDice: Int)
     }
     
-    private static let maxDice = 5
+    private static let maxDice = 15
     
     var sceneFrame: CGRect!
     var sceneView: SCNView!
@@ -61,6 +61,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             aroundTarget: simd_float3(x: 0, y: 0, z: 0)
         )
         floorNode.position = .init(x: 0, y: -3, z: 0)
+        floorNode.opacity = 1
+        floorNode.geometry?.firstMaterial?.diffuse.contents = UIColor.black
         
         ceilingNode = createWallNode()
         ceilingNode.simdRotate(
@@ -126,7 +128,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         
         for touch in touches {
             let position = viewPointToScene(touch.location(in: sceneView))
-            let die = Die(in: rootNode, assetName: "Default", particleName: "Default")
+            let die = Die(in: rootNode, assetName: "Default", particleName: "Ring")
             die.delegate = self
             dice.insert(die)
             heldDice[touch] = die
@@ -151,6 +153,10 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
                 y: CGFloat(currentLocation.z - previousLocation.z)
             ), at: currentLocation)
         }
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchesEnded(touches, with: event)
     }
     
     func die(_ die: Die, didStopOnValue value: Int) {

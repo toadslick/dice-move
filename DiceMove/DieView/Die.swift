@@ -131,6 +131,7 @@ class Die: NSObject {
         if (dieNode.physicsBody!.isResting) {
             state = .resting
             
+            dieNode.physicsBody!.type = .static
             dieNode.removeAllParticleSystems()
             delegate?.die(self, didStopOnValue: value)
         }
