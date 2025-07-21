@@ -14,11 +14,13 @@ struct ContentView: View {
                     ToolbarItem(placement: .topBarLeading) {
                         NavigationLink("Shop") {
                             ShopView()
+                                .navigationTitle("Shop")
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink("Inventory") {
                             InventoryView()
+                                .navigationTitle("Inventory")
                         }
                     }
                 }
