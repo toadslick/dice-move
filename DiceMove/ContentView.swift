@@ -36,9 +36,6 @@ struct ContentView: View {
                 .foregroundColor(.yellow)
                 .font(.largeTitle)
                 .fontWeight(.medium)
-                .animation(.bouncy)
-                .contentTransition(.numericText(value: Double(money)))
-                .id("money")
         }
     }
 }
