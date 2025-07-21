@@ -71,7 +71,7 @@ class Die: NSObject {
         dieNode.physicsBody!.restitution = 0.9
         parentNode.addChildNode(dieNode)
         
-        surfaceNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.04))
+        surfaceNode = SCNNode(geometry: SCNBox(width: 0.302, height: 0.302, length: 0.302, chamferRadius: 0.02))
         surfaceNode.position = .init(0, 0, 0)
         dieNode.addChildNode(surfaceNode)
         

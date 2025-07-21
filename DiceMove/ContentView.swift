@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     
     @AppStorage("money") private var money: Int = 0
+    @State private var showingPopover = false
     
     var body: some View {
         NavigationStack {
@@ -18,23 +19,27 @@ struct ContentView: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink("Inventory") {
+                        Button("Inventory") {
+                            showingPopover = true
+                        }
+                        .popover(isPresented: $showingPopover) {
                             InventoryView()
-                                .navigationTitle("Inventory")
+                                .frame(width: 300, height: 600)
+
                         }
                     }
                 }
                 .toolbarBackground(.visible, for: .navigationBar)
         }
-        .toolbar {
-            ToolbarItem(placement: .bottomBar) {
-                Text("$\(money)")
-                    .foregroundColor(.yellow)
-                    .font(.title2)
-                    .fontWeight(.medium)
-            }
+        .overlay(alignment: .bottom) {
+            Text("$\(money)")
+                .foregroundColor(.yellow)
+                .font(.largeTitle)
+                .fontWeight(.medium)
+                .animation(.bouncy)
+                .contentTransition(.numericText(value: Double(money)))
+                .id("money")
         }
-        .toolbarBackground(.visible, for: .bottomBar)
     }
 }
 
