@@ -42,14 +42,10 @@ class Die: NSObject {
     }
     
     private var currentSkin: UIImage {
-        let fileName = UserDefaults.standard.string(forKey: Skin.storageKey) ?? Skin.defaultValue
-        let url = Bundle.main.url(forResource: fileName, withExtension: Skin.fileExtension)
+        let fileName = InventoryCategory.skins.currentItem
+        let url = Bundle.main.url(forResource: fileName, withExtension: "jpg")
         let data = try! Data(contentsOf: url!)
         return .init(data: data)!
-    }
-
-    private var particleName: String {
-        UserDefaults.standard.string(forKey: Particle.storageKey) ?? Particle.defaultValue
     }
 
     init(in parentNode: SCNNode, assetName: String, worth: [Int]? = nil) {
@@ -75,7 +71,7 @@ class Die: NSObject {
         dieNode.physicsBody!.restitution = 0.9
         parentNode.addChildNode(dieNode)
         
-        surfaceNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.03))
+        surfaceNode = SCNNode(geometry: SCNBox(width: 0.3, height: 0.3, length: 0.3, chamferRadius: 0.04))
         surfaceNode.position = .init(0, 0, 0)
         dieNode.addChildNode(surfaceNode)
         
@@ -89,8 +85,7 @@ class Die: NSObject {
         
         super.init()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(setSkin), name: UserDefaults.didChangeNotification, object: nil)
-        setSkin()
+        surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
     }
     
     func beginHolding(at position: SCNVector3) {
@@ -133,7 +128,7 @@ class Die: NSObject {
 
         if
             (dieNode.particleSystems ?? []).isEmpty,
-            let ps = SCNParticleSystem(named: "\(particleName).scnp", inDirectory: nil)
+            let ps = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil)
         {
             dieNode.addParticleSystem(ps)
         }
@@ -200,11 +195,5 @@ class Die: NSObject {
     func despawn() {
         dieNode.removeAllParticleSystems()
         dieNode.removeFromParentNode()
-    }
-    
-    // MARK: handle user defaults change
-    
-    @objc private func setSkin() {
-        surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
     }
 }
