@@ -61,8 +61,17 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             aroundTarget: simd_float3(x: 0, y: 0, z: 0)
         )
         floorNode.position = .init(x: 0, y: -3, z: 0)
-        floorNode.opacity = 1
-        floorNode.geometry?.firstMaterial?.diffuse.contents = UIColor.black
+        
+        let backgroundNode = createWallNode()
+        backgroundNode.simdRotate(
+            by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(1, 0, 0))),
+            aroundTarget: simd_float3(x: 0, y: 0, z: 0)
+        )
+        backgroundNode.position = .init(x: 0, y: -10, z: 0)
+        backgroundNode.opacity = 1
+        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIColor.black
+
+        
         
         ceilingNode = createWallNode()
         ceilingNode.simdRotate(
