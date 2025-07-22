@@ -44,34 +44,37 @@ class MoneyView: UIView, Game.MoneyDelegate {
     
     // MARK: animate money label
     
-    private let maxTranslateDelta = 100.0
-    private let translateFactor = 3.0
-    private let rotateFactor = 0.01
-    private let maxRotate = 0.05 * .pi
+    private let maxScaleDelta = 1.0
+    private let maxMoneyDelta = 50.0
+    private let translateFactor = 15.0
+    private let maxAngle = 0.03 * .pi
 
     private var animator: UIViewPropertyAnimator?
-    private var translateY = 0.0
+    private var targetScale = 1.0
 
     func moneyDidChange(from previousAmount: Int, to newAmount: Int) {
-        let delta = Double(newAmount - previousAmount)
-        translateY = min(delta * translateFactor, maxTranslateDelta)
-        let rotateRange = min(delta * rotateFactor * .pi, maxRotate)
-        print(translateY)
+        let moneyDelta = min(Double(newAmount - previousAmount), maxMoneyDelta)
+        let scaleDelta = moneyDelta / maxMoneyDelta * maxScaleDelta
+        targetScale += scaleDelta
+
         DispatchQueue.main.async { [unowned self] in
             setText()
             
             animator?.stopAnimation(true)
-            animator = .init(duration: 0.1, curve: .easeOut)
+            animator = .init(duration: 0.05, curve: .easeInOut)
             animator!.addAnimations { [weak self] in
                 guard let self else { return }
-                moneyLabel.transform = moneyLabel.transform
-                    .translatedBy(x: 0, y: -translateY)
-                    .rotated(by: .random(in: -rotateRange...rotateRange))
+                moneyLabel.transform = .identity
+                    .scaledBy(x: targetScale, y: targetScale)
+                    .translatedBy(x: 0, y: -1 * targetScale * translateFactor)
+                    .rotated(by: .random(in: -maxAngle...maxAngle))
+                
             }
             animator!.addCompletion { [weak self] _ in
                 guard let self else { return }
-                animator = .init(duration: 0.0, curve: .easeIn)
-                translateY = 0
+
+                animator = .init(duration: 0.3 * targetScale, curve: .easeIn)
+                targetScale = 1
                 animator!.addAnimations { [weak self] in
                     guard let self else { return }
 
