@@ -42,20 +42,25 @@ class InventoryViewController:
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "item")!
         let (_, item) = itemForRow(at: indexPath)
+        let isSelected = isSelected(at: indexPath)
         
         cell.textLabel?.text = item
-        cell.setSelected(isSelected(at: indexPath), animated: false)
+        cell.selectionStyle = .default
+        cell.accessoryType = isSelected ? .checkmark : .none
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let (category, item) = itemForRow(at: indexPath)
         category.currentItem = item
-        
+
         category.items.indices.forEach { index in
             let indexPath = IndexPath(row: index, section: indexPath.section)
+            let isSelected = isSelected(at: indexPath)
             let cell = tableView.cellForRow(at: indexPath)!
-            cell.setSelected(isSelected(at: indexPath), animated: true)
+            cell.accessoryType = isSelected ? .checkmark : .none
+            cell.setSelected(false, animated: true) // Remove the highlight but not the checkmark
         }
     }
     
