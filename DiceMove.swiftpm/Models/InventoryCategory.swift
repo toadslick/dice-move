@@ -2,28 +2,39 @@ import Foundation
 
 class InventoryCategory {
     
+    static var faces: InventoryCategory = .init(
+        title: "Dice Face",
+        defaultValue: "Dots",
+        storageKey: "face",
+        items: [
+            "Dots",
+            "Numbers",
+        ]
+    )
+    
     static var skins: InventoryCategory = .init(
-            title: "Dice Skin",
-            defaultValue: "Ivory",
-            storageKey: "skin",
-            items: [
-                "Ivory",
-                "Gold",
-                "Metal",
-                "Wood",
-                "Nebula",
-                "Spark"
-            ]
-        )
+        title: "Dice Skin",
+        defaultValue: "Ivory",
+        storageKey: "skin",
+        items: [
+            "Ivory",
+            "Gold",
+            "Metal",
+            "Wood",
+            "Nebula",
+            "Spark",
+        ]
+    )
     
     static var particles: InventoryCategory = .init(
-            title: "Particle Effect",
-            defaultValue: "Embers",
-            storageKey: "particle",
-            items: filesWithExtension("scnp")
-        )
+        title: "Particle Effect",
+        defaultValue: "Embers",
+        storageKey: "particle",
+        items: filesWithExtension("scnp")
+    )
     
     static var all: [InventoryCategory] = [
+        faces,
         skins,
         particles
     ]
