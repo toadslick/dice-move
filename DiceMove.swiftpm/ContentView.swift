@@ -36,6 +36,7 @@ struct ContentView: View {
                 .foregroundColor(.yellow)
                 .font(.largeTitle)
                 .fontWeight(.medium)
+                .padding()
         }
     }
 }

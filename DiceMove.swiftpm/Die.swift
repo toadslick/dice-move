@@ -42,10 +42,7 @@ class Die: NSObject {
     }
     
     private var currentSkin: UIImage {
-        let fileName = InventoryCategory.skins.currentItem
-        let url = Bundle.main.url(forResource: fileName, withExtension: "jpg")
-        let data = try! Data(contentsOf: url!)
-        return .init(data: data)!
+        .init(resource: .init(name: InventoryCategory.skins.currentItem, bundle: .main))
     }
 
     init(in parentNode: SCNNode, assetName: String, worth: [Int]? = nil) {
