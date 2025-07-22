@@ -6,6 +6,13 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         title = "Dice Move"
         view.backgroundColor = .black
         
+        navigationItem.rightBarButtonItem = .init(
+            title: "Inventory",
+            style: .plain,
+            target: self,
+            action: #selector(inventoryAction)
+        )
+        
         let diceController = DiceController()
         diceController.dieDelegate = self
         addChild(diceController)
@@ -35,6 +42,16 @@ class ContentViewController: UIViewController, DiceController.Delegate {
     
     func die(_ die: Die, didStopOnValue value: Int) {
         Game.shared.money += value
+    }
+    
+    // MARK: button actions
+    
+    @objc private func inventoryAction(sender: UIBarButtonItem) {
+        let controller = UINavigationController(rootViewController: InventoryViewController())
+        controller.traitOverrides.userInterfaceStyle = .dark
+        controller.modalPresentationStyle = .popover
+        controller.popoverPresentationController?.sourceItem = sender
+        present(controller, animated: true)
     }
 
 }
