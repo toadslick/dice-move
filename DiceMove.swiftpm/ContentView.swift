@@ -1,46 +1,15 @@
 import SwiftUI
+import SceneKit
 
-struct ContentView: View {
-    
-    @AppStorage("money") private var money: Int = 0
-    @State private var showingPopover = false
-    
-    var body: some View {
-        NavigationStack {
-            DieView()
-                .ignoresSafeArea()
-                .navigationTitle("Dice Move")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        NavigationLink("Shop") {
-                            ShopView()
-                                .navigationTitle("Shop")
-                        }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Inventory") {
-                            showingPopover = true
-                        }
-                        .popover(isPresented: $showingPopover) {
-                            InventoryView()
-                                .frame(width: 300, height: 600)
+struct ContentView: UIViewControllerRepresentable {
 
-                        }
-                    }
-                }
-                .toolbarBackground(.visible, for: .navigationBar)
-        }
-        .overlay(alignment: .bottom) {
-            Text("$\(money)")
-                .foregroundColor(.yellow)
-                .font(.largeTitle)
-                .fontWeight(.medium)
-                .padding()
-        }
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let controller = UINavigationController(rootViewController: ContentViewController())
+        controller.traitOverrides.userInterfaceStyle = .dark
+        return controller
     }
-}
-
-#Preview {
-    ContentView()
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+        
+    }
 }

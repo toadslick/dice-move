@@ -19,7 +19,7 @@ let package = Package(
             displayVersion: "1.0",
             bundleVersion: "1",
             appIcon: .placeholder(icon: .coins),
-            accentColor: .presetColor(.teal),
+            accentColor: .presetColor(.blue),
             supportedDeviceFamilies: [
                 .pad,
                 .phone
@@ -29,7 +29,8 @@ let package = Package(
                 .landscapeRight,
                 .landscapeLeft,
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
-            ]
+            ],
+            appCategory: .arcadeGames
         )
     ],
     targets: [

@@ -2,8 +2,7 @@ import Foundation
 
 class InventoryCategory {
     
-    static var skins: InventoryCategory {
-        .init(
+    static var skins: InventoryCategory = .init(
             title: "Dice Skin",
             defaultValue: "Ivory",
             storageKey: "skin",
@@ -16,23 +15,18 @@ class InventoryCategory {
                 "Spark"
             ]
         )
-    }
     
-    static var particles: InventoryCategory {
-        .init(
+    static var particles: InventoryCategory = .init(
             title: "Particle Effect",
             defaultValue: "Embers",
             storageKey: "particle",
             items: filesWithExtension("scnp")
         )
-    }
     
-    static var all: [InventoryCategory] {
-        [
-            skins,
-            particles
-        ]
-    }
+    static var all: [InventoryCategory] = [
+        skins,
+        particles
+    ]
     
     private static func filesWithExtension(_ ext: String) -> [String] {
         let urls = Bundle.main.urls(
