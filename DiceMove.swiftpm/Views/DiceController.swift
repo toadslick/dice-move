@@ -209,12 +209,10 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     func die(_ die: Die, didStopOn value: Int) {
+        dice.remove(die)
+
         DispatchQueue.global(qos: .background).async { [unowned self] in
-            if dice.contains(die) {
-                dice.remove(die)
-            }
             die.despawn()
-            
             let position = sceneView.projectPoint(die.dieNode.presentation.worldPosition)
             let point = CGPoint(
                 x: CGFloat(position.x),
