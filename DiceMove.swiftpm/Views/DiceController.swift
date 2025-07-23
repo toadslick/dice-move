@@ -145,48 +145,54 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard
-            let rootNode = sceneView.scene?.rootNode,
-            dice.count < Self.maxDice
-        else { return }
-        
-        for touch in touches {
-            let position = viewPointToScene(touch.location(in: sceneView))
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            guard
+                let rootNode = sceneView.scene?.rootNode,
+                dice.count < Self.maxDice
+            else { return }
             
-        
-            let die: Die
-            let percent = Float.random(in: 0...1)
-            if percent > 0.98 {
-                die = Die(in: rootNode, assetName: "Explosion", worth: [
-                    1000, 1000, 1000, 3000, 1000, 1000,
-                ])
-            } else {
-                die = Die(in: rootNode, assetName: InventoryCategory.faces.currentItem)
+            for touch in touches {
+                let position = viewPointToScene(touch.location(in: sceneView))
+                
+                
+                let die: Die
+                let percent = Float.random(in: 0...1)
+                if percent > 0.98 {
+                    die = Die(in: rootNode, assetName: "Explosion", worth: [
+                        1000, 1000, 1000, 3000, 1000, 1000,
+                    ])
+                } else {
+                    die = Die(in: rootNode, assetName: InventoryCategory.faces.currentItem)
+                }
+                
+                die.delegate = self
+                dice.insert(die)
+                heldDice[touch] = die
+                die.beginHolding(at: position)
             }
-            
-            die.delegate = self
-            dice.insert(die)
-            heldDice[touch] = die
-            die.beginHolding(at: position)
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let position = viewPointToScene(touch.location(in: sceneView))
-            heldDice[touch]?.continueHolding(at: position)
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            for touch in touches {
+                let position = viewPointToScene(touch.location(in: sceneView))
+                heldDice[touch]?.continueHolding(at: position)
+            }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let currentLocation = viewPointToScene(touch.location(in: sceneView))
-            let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
-
-            heldDice[touch]?.beginRolling(velocity: .init(
-                x: CGFloat(currentLocation.x - previousLocation.x),
-                y: CGFloat(currentLocation.z - previousLocation.z)
-            ), at: currentLocation)
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            for touch in touches {
+                let currentLocation = viewPointToScene(touch.location(in: sceneView))
+                let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
+                
+                heldDice[touch]?.beginRolling(velocity: .init(
+                    x: CGFloat(currentLocation.x - previousLocation.x),
+                    y: CGFloat(currentLocation.z - previousLocation.z)
+                ), at: currentLocation)
+            }
         }
     }
     
@@ -233,7 +239,9 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     private func setBackground() {
-        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: InventoryCategory.backgrounds.currentItem)
+        DispatchQueue.global(qos: .background).async { [unowned self] in
+            backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: InventoryCategory.backgrounds.currentItem)
+        }
     }
     
     deinit {
