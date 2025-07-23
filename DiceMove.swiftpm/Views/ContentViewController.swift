@@ -20,17 +20,11 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         diceController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(diceController.view)
         
-        let moneyView = MoneyView(frame: .zero)
-        view.addSubview(moneyView)
-        
         NSLayoutConstraint.activate([
             diceController.view.topAnchor.constraint(equalTo: view.topAnchor),
             diceController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             diceController.view.leftAnchor.constraint(equalTo: view.leftAnchor),
             diceController.view.rightAnchor.constraint(equalTo: view.rightAnchor),
-            
-            moneyView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            moneyView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
     }
     

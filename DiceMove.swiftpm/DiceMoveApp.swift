@@ -4,8 +4,11 @@ import SwiftUI
 struct DiceMoveApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .ignoresSafeArea()
+            ZStack(alignment: .bottom) {
+                ContentView()
+                    .ignoresSafeArea()
+                MoneyView()
+            }
         }
     }
 }
