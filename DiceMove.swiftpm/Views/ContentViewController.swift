@@ -21,7 +21,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         
         
         let diceController = DiceController()
-        diceController.dieDelegate = self
+        diceController.delegate = self
         addChild(diceController)
         diceController.didMove(toParent: self)
         diceController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -41,8 +41,13 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         
     }
     
-    func die(_ die: Die, didStopOnValue value: Int) {
+    func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
         Game.shared.money += value
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            FadingDieScoreView.create(score: value, at: point, in: self.view)
+        }
     }
     
     // MARK: button actions

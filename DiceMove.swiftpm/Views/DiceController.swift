@@ -5,7 +5,8 @@ import SceneKit.ModelIO
 
 class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
-    protocol Delegate: Die.Delegate {
+    protocol Delegate {
+        func die(_ die: Die, didStopOn value: Int, at point: CGPoint)
         func dice(didChange dice: Set<Die>, maxDice: Int)
     }
     
@@ -25,7 +26,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     var dice: Set<Die> = []
     var heldDice: [UITouch: Die] = [:]
-    var dieDelegate: Die.Delegate?
+    var delegate: Delegate?
     
     override func loadView() {
         view = SCNView(frame: .zero)
@@ -193,10 +194,16 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         touchesEnded(touches, with: event)
     }
     
-    func die(_ die: Die, didStopOnValue value: Int) {
+    func die(_ die: Die, didStopOn value: Int) {
         die.despawn()
         dice.remove(die)
-        dieDelegate?.die(die, didStopOnValue: value)
+        
+        let position = sceneView.projectPoint(die.dieNode.presentation.worldPosition)
+        let point = CGPoint(
+            x: CGFloat(position.x),
+            y: CGFloat(position.y)
+        )
+        delegate?.die(die, didStopOn: value, at: point)
     }
 
     

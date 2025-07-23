@@ -10,7 +10,7 @@ class Die: NSObject {
     }
     
     protocol Delegate {
-        func die(_ die: Die, didStopOnValue value: Int)
+        func die(_ die: Die, didStopOn value: Int)
     }
     
     private static let facePositions: [SCNVector3] = [
@@ -24,9 +24,9 @@ class Die: NSObject {
     
     private static let velocityFactor: Float = 2000 // TODO: calculate based on frame rate
     
-    private let dieNode: SCNNode
-    private let faceNodes: [SCNNode]
-    private let surfaceNode: SCNNode
+    let dieNode: SCNNode
+    let faceNodes: [SCNNode]
+    let surfaceNode: SCNNode
     
     private let worth: [Int]?
     
@@ -142,7 +142,7 @@ class Die: NSObject {
             if let worth {
                 money = worth[value - 1]
             }
-            delegate?.die(self, didStopOnValue: money)
+            delegate?.die(self, didStopOn: money)
         }
     }
     
