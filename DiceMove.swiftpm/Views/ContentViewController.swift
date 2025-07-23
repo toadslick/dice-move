@@ -13,6 +13,13 @@ class ContentViewController: UIViewController, DiceController.Delegate {
             action: #selector(inventoryAction)
         )
         
+        let appearance = UINavigationBarAppearance()
+        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        appearance.backgroundColor = .clear
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        
         let diceController = DiceController()
         diceController.dieDelegate = self
         addChild(diceController)

@@ -34,6 +34,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        UserDefaults.standard.addObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey, context: nil)
+        
         sceneView = (self.view as! SCNView)
         sceneView.delegate = self
         sceneView.autoenablesDefaultLighting = true
@@ -71,7 +73,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         backgroundNode.position = .init(x: 0, y: -10, z: 0)
         backgroundNode.opacity = 1
         backgroundNode.geometry?.firstMaterial?.isDoubleSided = true
-        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "Nebula")
+        setBackground()
         
         ceilingNode = createWallNode()
         ceilingNode.simdRotate(
@@ -213,5 +215,21 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         ))
         sceneView.scene!.rootNode.addChildNode(node)
         return node
+    }
+    
+    // MARK: update background when changed
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == InventoryCategory.backgrounds.storageKey {
+            setBackground()
+        }
+    }
+    
+    private func setBackground() {
+        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: InventoryCategory.backgrounds.currentItem)
+    }
+    
+    deinit {
+        UserDefaults.standard.removeObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey)
     }
 }

@@ -33,10 +33,24 @@ class InventoryCategory {
         items: filesWithExtension("scnp")
     )
     
+    static var backgrounds: InventoryCategory = .init(
+        title: "Background",
+        defaultValue: "Black",
+        storageKey: "background",
+        items: [
+            "Black",
+            "Felt",
+            "Cedar",
+            "Water",
+            "Space",
+        ]
+    )
+    
     static var all: [InventoryCategory] = [
         faces,
         skins,
-        particles
+        particles,
+        backgrounds
     ]
     
     private static func filesWithExtension(_ ext: String) -> [String] {
