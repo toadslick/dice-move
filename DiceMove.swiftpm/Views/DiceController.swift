@@ -36,13 +36,13 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         super.viewDidLoad()
         
         UserDefaults.standard.addObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey, context: nil)
-        
+                
         sceneView = (self.view as! SCNView)
         sceneView.delegate = self
         sceneView.autoenablesDefaultLighting = true
         sceneView.backgroundColor = UIColor.clear
         sceneView.contentMode = .center
-
+        
         let scene = SCNScene()
         scene.physicsWorld.speed = 1.5
         sceneView.scene = scene
@@ -83,12 +83,12 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         )
         ceilingNode.position = .init(x: 0, y: 4, z: 0)
         ceilingNode.opacity = 0
-
+        
         topWallNode = createWallNode()
         bottomWallNode = createWallNode()
         leftWallNode = createWallNode()
         rightWallNode = createWallNode()
-
+        
         leftWallNode.simdRotate(
             by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(0, 1, 0))),
             aroundTarget: simd_float3(x: 0, y: 0, z: 0)
@@ -145,6 +145,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        
         DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
             guard
                 let rootNode = sceneView.scene?.rootNode,
@@ -153,8 +155,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             
             for touch in touches {
                 let position = viewPointToScene(touch.location(in: sceneView))
-                
-                
                 let die: Die
                 let percent = Float.random(in: 0...1)
                 if percent > 0.98 {
@@ -174,6 +174,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+        
         DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
             for touch in touches {
                 let position = viewPointToScene(touch.location(in: sceneView))
@@ -183,6 +185,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
         DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
             for touch in touches {
                 let currentLocation = viewPointToScene(touch.location(in: sceneView))
@@ -192,26 +196,34 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
                     x: CGFloat(currentLocation.x - previousLocation.x),
                     y: CGFloat(currentLocation.z - previousLocation.z)
                 ), at: currentLocation)
+                heldDice.removeValue(forKey: touch)
             }
         }
     }
     
+    
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        
         touchesEnded(touches, with: event)
     }
     
     func die(_ die: Die, didStopOn value: Int) {
-        die.despawn()
-        dice.remove(die)
-        
-        let position = sceneView.projectPoint(die.dieNode.presentation.worldPosition)
-        let point = CGPoint(
-            x: CGFloat(position.x),
-            y: CGFloat(position.y)
-        )
-        delegate?.die(die, didStopOn: value, at: point)
+        DispatchQueue.global(qos: .background).async { [unowned self] in
+            if dice.contains(die) {
+                dice.remove(die)
+            }
+            die.despawn()
+            
+            let position = sceneView.projectPoint(die.dieNode.presentation.worldPosition)
+            let point = CGPoint(
+                x: CGFloat(position.x),
+                y: CGFloat(position.y)
+            )
+            delegate?.die(die, didStopOn: value, at: point)
+        }
     }
-
+    
     
     private func viewPointToScene(_ viewPoint: CGPoint, additionalDepth: Float = 0) -> SCNVector3 {
         let scenePoint = sceneView.unprojectPoint(.init(x: Float(viewPoint.x), y: Float(viewPoint.y), z: 0))

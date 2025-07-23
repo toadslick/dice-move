@@ -17,11 +17,14 @@ class FadingDieScoreView: UIView {
         )
         superview.addSubview(view)
         
-        UIView.animate(withDuration: 4) {
-            view.alpha = 0
+        UIView.animate(withDuration: 1) {
             view.transform = .identity.translatedBy(x: 0, y: -100)
         } completion: { [weak view] _ in
             view?.removeFromSuperview()
+        }
+        
+        UIView.animate(withDuration: 0.25, delay: 0.7) {
+            view.alpha = 0
         }
     }
     
@@ -40,7 +43,7 @@ class FadingDieScoreView: UIView {
         
         label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.font = .systemFont(ofSize: 26, weight: .semibold)
         label.textColor = .systemYellow
         label.textAlignment = .center
         label.numberOfLines = 1

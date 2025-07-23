@@ -44,7 +44,7 @@ class Die: NSObject {
     private var currentSkin: UIImage {
         .init(resource: .init(name: InventoryCategory.skins.currentItem, bundle: .main))
     }
-
+    
     init(in parentNode: SCNNode, assetName: String, worth: [Int]? = nil) {
         self.worth = worth
         
@@ -55,6 +55,8 @@ class Die: NSObject {
         dieNode.name = "die"
         dieNode.simdScale = .init(2, 2, 2)
         dieNode.position = .init(x: 0, y: 0, z: 0)
+        dieNode.opacity = 0
+        
         dieNode.physicsBody = .init(type: .dynamic, shape: .init(
             geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
             options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
@@ -83,6 +85,17 @@ class Die: NSObject {
         super.init()
         
         surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
+        
+        let animation = CABasicAnimation(keyPath: "opacity")
+        animation.fromValue = 0.0
+        animation.toValue = 1.0
+        animation.duration = 0.1
+        animation.autoreverses = false
+        animation.repeatCount = .zero
+        animation.isRemovedOnCompletion = true
+        dieNode.addAnimation(animation, forKey: nil)
+        
+        dieNode.opacity = 1
     }
     
     func beginHolding(at position: SCNVector3) {
@@ -96,7 +109,7 @@ class Die: NSObject {
     
     func continueHolding(at position: SCNVector3) {
         guard state == .holding else { return }
-
+        
         dieNode.position = position
         dieNode.physicsBody?.velocity = .init(0, 0, 0)
         dieNode.physicsBody?.angularVelocity = .init(0, 0, 0, 0)
@@ -108,11 +121,11 @@ class Die: NSObject {
         state = .rolling
         
         dieNode.physicsBody!.type = .dynamic
-
+        
         let vx = Float(velocity.x) * Self.velocityFactor
         let vy = Float(velocity.y) * Self.velocityFactor
         dieNode.physicsBody!.applyForce(.init(vx, 0, vy), asImpulse: false)
-
+        
         // Apply a random angular force
         let minTorque = 0.05
         let maxTorque = 0.5
@@ -122,7 +135,7 @@ class Die: NSObject {
             .random(in: minTorque...maxTorque),
             .random(in: minTorque...maxTorque)
         ), asImpulse: true)
-
+        
         if
             (dieNode.particleSystems ?? []).isEmpty,
             let ps = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil)
