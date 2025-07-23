@@ -28,9 +28,14 @@ class InventoryCategory {
     
     static var particles: InventoryCategory = .init(
         title: "Particle Effect",
-        defaultValue: "Embers",
+        defaultValue: "None",
         storageKey: "particle",
-        items: filesWithExtension("scnp")
+        items: [
+            "None",
+            "Embers",
+            "Neon",
+            "Fireworks",
+        ]
     )
     
     static var backgrounds: InventoryCategory = .init(
@@ -46,28 +51,25 @@ class InventoryCategory {
         ]
     )
     
+    static var auras: InventoryCategory = .init(
+        title: "Aura",
+        defaultValue: "None",
+        storageKey: "aura",
+        items: [
+            "None",
+            "Celestial",
+            "Oblivion",
+        ]
+    )
+
+    
     static var all: [InventoryCategory] = [
         faces,
         skins,
         particles,
-        backgrounds
+        backgrounds,
+        auras
     ]
-    
-    private static func filesWithExtension(_ ext: String) -> [String] {
-        let urls = Bundle.main.urls(
-            forResourcesWithExtension: ext,
-            subdirectory: nil
-        ) ?? []
-        
-        return urls.map { url in
-            guard
-                let fileName = url.pathComponents.last as? NSString
-            else {
-                return ""
-            }
-            return fileName.deletingPathExtension
-        }
-    }
     
     init(title: String, defaultValue: String, storageKey: String, items: [String]) {
         self.title = title

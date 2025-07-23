@@ -138,9 +138,11 @@ class Die: NSObject {
         
         if
             (dieNode.particleSystems ?? []).isEmpty,
-            let ps = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil)
+            let particle = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil),
+            let aura = SCNParticleSystem(named: "\(InventoryCategory.auras.currentItem).scnp", inDirectory: nil)
         {
-            dieNode.addParticleSystem(ps)
+            dieNode.addParticleSystem(particle)
+            dieNode.addParticleSystem(aura)
         }
     }
     
