@@ -21,6 +21,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     var rightWallNode: SCNNode!
     var floorNode: SCNNode!
     var ceilingNode: SCNNode!
+    var backgroundNode: SCNNode!
     
     var dice: Set<Die> = []
     var heldDice: [UITouch: Die] = [:]
@@ -62,16 +63,15 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         )
         floorNode.position = .init(x: 0, y: -3, z: 0)
         
-        let backgroundNode = createWallNode()
+        backgroundNode = createWallNode()
         backgroundNode.simdRotate(
             by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(1, 0, 0))),
             aroundTarget: simd_float3(x: 0, y: 0, z: 0)
         )
         backgroundNode.position = .init(x: 0, y: -10, z: 0)
         backgroundNode.opacity = 1
-        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIColor.black
-
-        
+        backgroundNode.geometry?.firstMaterial?.isDoubleSided = true
+        backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "Nebula")
         
         ceilingNode = createWallNode()
         ceilingNode.simdRotate(
@@ -115,6 +115,18 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         topWallNode.position = topLeftPosition
         rightWallNode.position = bottomRightPosition
         bottomWallNode.position = bottomRightPosition
+        
+        // Resize the background node to aspect-fill the view.
+        let topLeft = viewPointToScene(.zero, additionalDepth: 11)
+        let bottomRight = viewPointToScene(.init(x: sceneFrame.width, y: sceneFrame.height), additionalDepth: 10)
+        let targetSize = max(bottomRight.x - topLeft.x, bottomRight.z - topLeft.z)
+        let currentWidth = (backgroundNode.boundingBox.max.x - backgroundNode.boundingBox.min.x)
+        let currentHeight = (backgroundNode.boundingBox.max.y - backgroundNode.boundingBox.min.y)
+        backgroundNode.scale = .init(
+            x: targetSize / currentWidth,
+            y: targetSize / currentHeight,
+            z: 1
+        )
         
         for die in dice {
             die.maybeBeginResting()
@@ -186,17 +198,18 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
 
     
-    private func viewPointToScene(_ viewPoint: CGPoint) -> SCNVector3 {
+    private func viewPointToScene(_ viewPoint: CGPoint, additionalDepth: Float = 0) -> SCNVector3 {
         let scenePoint = sceneView.unprojectPoint(.init(x: Float(viewPoint.x), y: Float(viewPoint.y), z: 0))
-        let factor = cameraNode.position.y
+        let factor = cameraNode.position.y + additionalDepth
         return .init(x: scenePoint.x * factor, y: 0, z: scenePoint.z * factor)
     }
     
     private func createWallNode() -> SCNNode {
-        let node = SCNNode(geometry: SCNPlane(width: 50, height: 50))
+        let size = 30.0
+        let node = SCNNode(geometry: SCNPlane(width: size, height: size))
         node.opacity = 0
         node.physicsBody = .init(type: .static, shape: .init(
-            geometry: SCNPlane(width: 50, height: 50)
+            geometry: SCNPlane(width: size, height: size)
         ))
         sceneView.scene!.rootNode.addChildNode(node)
         return node

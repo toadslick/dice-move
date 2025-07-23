@@ -9,6 +9,7 @@ class InventoryViewController:
     
     override func viewDidLoad() {
         title = "Inventory"
+        view.backgroundColor = .clear
         
         tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.dataSource = self
@@ -17,6 +18,7 @@ class InventoryViewController:
         tableView.allowsSelection = true
         tableView.allowsMultipleSelection = true
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .clear
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
