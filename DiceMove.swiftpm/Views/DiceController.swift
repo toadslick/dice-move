@@ -108,38 +108,46 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     func renderer(_ renderer: any SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        // Update the position of the walls to match the viewport.
-        let topLeftPoint = CGPoint(x: sceneFrame.minX, y: sceneFrame.minY)
-        let topLeftPosition = viewPointToScene(topLeftPoint)
-        let bottomRightPoint = CGPoint(x: sceneFrame.maxX, y: sceneFrame.maxY)
-        let bottomRightPosition = viewPointToScene(bottomRightPoint)
-        leftWallNode.position = topLeftPosition
-        topWallNode.position = topLeftPosition
-        rightWallNode.position = bottomRightPosition
-        bottomWallNode.position = bottomRightPosition
-        
-        // Resize the background node to aspect-fill the view.
-        let topLeft = viewPointToScene(.zero, additionalDepth: 11)
-        let bottomRight = viewPointToScene(.init(x: sceneFrame.width, y: sceneFrame.height), additionalDepth: 10)
-        let targetSize = max(bottomRight.x - topLeft.x, bottomRight.z - topLeft.z)
-        let currentWidth = (backgroundNode.boundingBox.max.x - backgroundNode.boundingBox.min.x)
-        let currentHeight = (backgroundNode.boundingBox.max.y - backgroundNode.boundingBox.min.y)
-        backgroundNode.scale = .init(
-            x: targetSize / currentWidth,
-            y: targetSize / currentHeight,
-            z: 1
-        )
-        
-        for die in dice {
-            die.maybeBeginResting()
-            die.keepWithinWalls(
-                top: topWallNode,
-                bottom: bottomWallNode,
-                left: leftWallNode,
-                right: rightWallNode,
-                floor: floorNode,
-                ceiling: ceilingNode
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self else { return }
+            
+            // Update the position of the walls to match the viewport.
+            let topLeftPoint = CGPoint(x: sceneFrame.minX, y: sceneFrame.minY)
+            let topLeftPosition = viewPointToScene(topLeftPoint)
+            let bottomRightPoint = CGPoint(x: sceneFrame.maxX, y: sceneFrame.maxY)
+            let bottomRightPosition = viewPointToScene(bottomRightPoint)
+            leftWallNode.position = topLeftPosition
+            topWallNode.position = topLeftPosition
+            rightWallNode.position = bottomRightPosition
+            bottomWallNode.position = bottomRightPosition
+            
+            // Resize the background node to aspect-fill the view.
+            let topLeft = viewPointToScene(.zero, additionalDepth: 11)
+            let bottomRight = viewPointToScene(.init(x: sceneFrame.width, y: sceneFrame.height), additionalDepth: 10)
+            let targetSize = max(bottomRight.x - topLeft.x, bottomRight.z - topLeft.z)
+            let currentWidth = (backgroundNode.boundingBox.max.x - backgroundNode.boundingBox.min.x)
+            let currentHeight = (backgroundNode.boundingBox.max.y - backgroundNode.boundingBox.min.y)
+            backgroundNode.scale = .init(
+                x: targetSize / currentWidth,
+                y: targetSize / currentHeight,
+                z: 1
             )
+            
+            for die in dice {
+                die.maybeBeginResting()
+                die.keepWithinWalls(
+                    top: topWallNode,
+                    bottom: bottomWallNode,
+                    left: leftWallNode,
+                    right: rightWallNode,
+                    floor: floorNode,
+                    ceiling: ceilingNode
+                )
+            }
+        }
+        
+        heldDice.forEach { (touch, die) in
+            die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     
@@ -164,12 +172,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             dice.insert(die)
             heldDice[touch] = die
             die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            heldDice[touch]?.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     

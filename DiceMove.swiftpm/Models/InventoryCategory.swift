@@ -27,9 +27,9 @@ class InventoryCategory {
     )
     
     static var particles: InventoryCategory = .init(
-        title: "Particle Effect",
+        title: "Trail",
         defaultValue: "None",
-        storageKey: "particle",
+        storageKey: "trail",
         items: [
             "None",
             "Embers",

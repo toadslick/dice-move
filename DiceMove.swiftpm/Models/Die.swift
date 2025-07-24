@@ -63,6 +63,13 @@ class Die: NSObject {
             geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
             options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
         ))
+        dieNode.physicsBody?.friction = 1
+        dieNode.physicsBody?.continuousCollisionDetectionThreshold = 0.5
+        dieNode.physicsBody?.rollingFriction = 0
+        dieNode.physicsBody?.mass = 4
+        dieNode.physicsBody?.linearRestingThreshold = 10
+        dieNode.physicsBody?.angularRestingThreshold = 3
+        dieNode.physicsBody?.restitution = 0.9
         
         DispatchQueue.global(qos: .userInteractive).async { [weak self, weak dieNode] in
             guard
@@ -74,7 +81,6 @@ class Die: NSObject {
             dieNode.simdScale = .init(2, 2, 2)
             dieNode.simdEulerAngles = .random(in: 0...(.pi))
             dieNode.position = .init(x: 0, y: 0, z: 0)
-            
             
             parentNode.addChildNode(dieNode)
             
@@ -115,15 +121,6 @@ class Die: NSObject {
         
         DispatchQueue.global(qos: .userInteractive).async { [weak dieNode] in
             guard let dieNode else { return }
-            
-            dieNode.physicsBody?.type = .dynamic
-            dieNode.physicsBody?.friction = 1
-            dieNode.physicsBody?.continuousCollisionDetectionThreshold = 0.5
-            dieNode.physicsBody?.rollingFriction = 0
-            dieNode.physicsBody?.mass = 4
-            dieNode.physicsBody?.linearRestingThreshold = 10
-            dieNode.physicsBody?.angularRestingThreshold = 3
-            dieNode.physicsBody?.restitution = 0.9
             
             let vx = Float(velocity.x) * Self.velocityFactor
             let vy = Float(velocity.y) * Self.velocityFactor
@@ -211,9 +208,11 @@ class Die: NSObject {
     }
     
     func despawn() {
-        guard let dieNode else { return }
-        dieNode.removeAllParticleSystems()
-        dieNode.removeFromParentNode()
+        DispatchQueue.global(qos: .userInteractive).async { [weak dieNode] in
+            guard let dieNode else { return }
+            dieNode.removeAllParticleSystems()
+            dieNode.removeFromParentNode()
+        }
     }
     
     private static func viewPointToScene(_ viewPoint: CGPoint, sceneView: SCNView, depth: Float) -> SCNVector3 {
