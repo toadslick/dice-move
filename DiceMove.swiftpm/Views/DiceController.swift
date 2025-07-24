@@ -232,7 +232,9 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     private func setBackground() {
-        DispatchQueue.global(qos: .background).async { [unowned self] in
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self else { return }
+            
             let image = UIImage(named: InventoryCategory.backgrounds.currentItem)
             backgroundNode.geometry?.firstMaterial?.diffuse.contents = image
             

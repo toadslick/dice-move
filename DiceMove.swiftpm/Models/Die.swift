@@ -64,7 +64,12 @@ class Die: NSObject {
             options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
         ))
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+        DispatchQueue.global(qos: .userInteractive).async { [weak self, weak dieNode] in
+            guard
+                let self,
+                let dieNode
+            else { return }
+            
             dieNode.name = "die"
             dieNode.simdScale = .init(2, 2, 2)
             dieNode.simdEulerAngles = .random(in: 0...(.pi))
@@ -93,12 +98,10 @@ class Die: NSObject {
     }
     
     func continueHolding(at point: CGPoint, in sceneView: SCNView, depth: Float) {
-        guard
-            let dieNode,
-            state == .holding
-        else { return }
+        guard state == .holding else { return }
 
-        DispatchQueue.global(qos: .userInteractive).async {
+        DispatchQueue.global(qos: .userInteractive).async { [weak dieNode] in
+            guard let dieNode else { return }
             let position = Self.viewPointToScene(point, sceneView: sceneView, depth: depth)
             dieNode.position = position
             dieNode.physicsBody?.velocity = .init(0, 0, 0)
@@ -107,13 +110,12 @@ class Die: NSObject {
     }
     
     func beginRolling(velocity: CGPoint, at point: CGPoint, in sceneView: SCNView, depth: Float) {
-        guard
-            let dieNode,
-            state == .holding
-        else { return }
+        guard state == .holding else { return }
         state = .rolling
         
-        DispatchQueue.global(qos: .userInteractive).async {
+        DispatchQueue.global(qos: .userInteractive).async { [weak dieNode] in
+            guard let dieNode else { return }
+            
             dieNode.physicsBody?.type = .dynamic
             dieNode.physicsBody?.friction = 1
             dieNode.physicsBody?.continuousCollisionDetectionThreshold = 0.5
@@ -210,30 +212,8 @@ class Die: NSObject {
     
     func despawn() {
         guard let dieNode else { return }
-        
-        let fadeDuration = 0.25
-        
-        dieNode.physicsBody?.type = .static
-        dieNode.particleSystems?.forEach { ps in
-            ps.birthRate = 0
-        }
-        
-        let animation = CABasicAnimation(keyPath: "opacity")
-        animation.fromValue = 1
-        animation.toValue = 0
-        animation.duration = fadeDuration
-        animation.autoreverses = false
-        animation.repeatCount = .zero
-        animation.isRemovedOnCompletion = true
-        dieNode.addAnimation(animation, forKey: nil)
-        dieNode.opacity = 0
-
-        let _ = Timer(timeInterval: fadeDuration, repeats: false) { timer in
-            DispatchQueue.global().async {
-                dieNode.removeAllParticleSystems()
-                dieNode.removeFromParentNode()
-            }
-        }
+        dieNode.removeAllParticleSystems()
+        dieNode.removeFromParentNode()
     }
     
     private static func viewPointToScene(_ viewPoint: CGPoint, sceneView: SCNView, depth: Float) -> SCNVector3 {
