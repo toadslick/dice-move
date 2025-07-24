@@ -118,6 +118,10 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
                 explosions.remove(exp)
             }
         }
+        
+        dice.forEach { die in
+            die.maybeBeginResting()
+        }
 
         DispatchQueue.global(qos: .background).async { [weak self] in
             guard let self else { return }
@@ -147,7 +151,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             )
             
             for die in dice {
-                die.maybeBeginResting()
                 die.keepWithinWalls(
                     top: topWallNode,
                     bottom: bottomWallNode,

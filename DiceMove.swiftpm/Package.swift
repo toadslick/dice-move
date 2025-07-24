@@ -16,6 +16,8 @@ let package = Package(
         .iOSApplication(
             name: "Dice Move",
             targets: ["AppModule"],
+            bundleIdentifier: "com.JamesChildress.DiceMove",
+            teamIdentifier: "XD9N73U3J7",
             displayVersion: "1.0",
             bundleVersion: "1",
             appIcon: .placeholder(icon: .coins),
