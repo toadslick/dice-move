@@ -144,8 +144,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
-        
         guard
             let rootNode = sceneView.scene?.rootNode,
             dice.count < Self.maxDice
@@ -170,16 +168,12 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesMoved(touches, with: event)
-        
         for touch in touches {
             heldDice[touch]?.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-        
         for touch in touches {
             let currentLocation = viewPointToScene(touch.location(in: sceneView))
             let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
@@ -194,8 +188,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesCancelled(touches, with: event)
-        
         touchesEnded(touches, with: event)
     }
     

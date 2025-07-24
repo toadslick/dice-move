@@ -3,6 +3,12 @@ import SceneKit.ModelIO
 
 class Die: NSObject {
     
+    enum State {
+        case holding
+        case rolling
+        case resting
+    }
+    
     protocol Delegate {
         func die(_ die: Die, didStopOn value: Int)
     }
@@ -22,6 +28,7 @@ class Die: NSObject {
     private var faceNodes: [SCNNode]?
     private var surfaceNode: SCNNode?
     
+    private var state = State.holding
     private var overrideFaceValues: [Int]?
     var delegate: Delegate?
     
@@ -45,29 +52,25 @@ class Die: NSObject {
     ) {
         self.overrideFaceValues = overrideFaceValues
         super.init()
-
+        
         let asset = MDLAsset(url: Bundle.main.url(forResource: textureName, withExtension: "usdz")!)
         asset.loadTextures()
         dieNode = SCNNode(mdlObject: asset.object(at: 0))
-
+        
+        guard let dieNode else { return }
+        
+        dieNode.physicsBody = .init(type: .dynamic, shape: .init(
+            geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
+            options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
+        ))
+        
         DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            guard let dieNode else { return }
             dieNode.name = "die"
             dieNode.simdScale = .init(2, 2, 2)
             dieNode.simdEulerAngles = .random(in: 0...(.pi))
             dieNode.position = .init(x: 0, y: 0, z: 0)
             
-            dieNode.physicsBody = .init(type: .kinematic, shape: .init(
-                geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
-                options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
-            ))
-            dieNode.physicsBody!.friction = 1
-            dieNode.physicsBody!.continuousCollisionDetectionThreshold = 0.5
-            dieNode.physicsBody!.rollingFriction = 0
-            dieNode.physicsBody!.mass = 4
-            dieNode.physicsBody!.linearRestingThreshold = 10
-            dieNode.physicsBody!.angularRestingThreshold = 3
-            dieNode.physicsBody!.restitution = 0.9
+            
             parentNode.addChildNode(dieNode)
             
             surfaceNode = SCNNode(geometry: SCNBox(width: 0.302, height: 0.302, length: 0.302, chamferRadius: 0.02))
@@ -90,8 +93,11 @@ class Die: NSObject {
     }
     
     func continueHolding(at point: CGPoint, in sceneView: SCNView, depth: Float) {
-        guard let dieNode else { return }
-        
+        guard
+            let dieNode,
+            state == .holding
+        else { return }
+
         DispatchQueue.global(qos: .userInteractive).async {
             let position = Self.viewPointToScene(point, sceneView: sceneView, depth: depth)
             dieNode.position = position
@@ -101,12 +107,21 @@ class Die: NSObject {
     }
     
     func beginRolling(velocity: CGPoint, at point: CGPoint, in sceneView: SCNView, depth: Float) {
-        continueHolding(at: point, in: sceneView, depth: depth)
+        guard
+            let dieNode,
+            state == .holding
+        else { return }
+        state = .rolling
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            guard let dieNode else { return }
-            
+        DispatchQueue.global(qos: .userInteractive).async {
             dieNode.physicsBody?.type = .dynamic
+            dieNode.physicsBody?.friction = 1
+            dieNode.physicsBody?.continuousCollisionDetectionThreshold = 0.5
+            dieNode.physicsBody?.rollingFriction = 0
+            dieNode.physicsBody?.mass = 4
+            dieNode.physicsBody?.linearRestingThreshold = 10
+            dieNode.physicsBody?.angularRestingThreshold = 3
+            dieNode.physicsBody?.restitution = 0.9
             
             let vx = Float(velocity.x) * Self.velocityFactor
             let vy = Float(velocity.y) * Self.velocityFactor
@@ -134,21 +149,22 @@ class Die: NSObject {
     }
     
     func maybeBeginResting() {
-        guard let dieNode else { return }
+        guard
+            let dieNode,
+            state == .rolling,
+            dieNode.physicsBody?.isResting ?? false
+        else { return }
+        state = .resting
+
+        dieNode.removeAllParticleSystems()
         
-        if (dieNode.physicsBody!.isResting) {
-            
-            DispatchQueue.global().async {
-                dieNode.removeAllParticleSystems()
-            }
-            
-            var money = value
-            if let overrideFaceValues {
-                money = overrideFaceValues[value - 1]
-            }
-            delegate?.die(self, didStopOn: money)
+        var money = value
+        if let overrideFaceValues {
+            money = overrideFaceValues[value - 1]
         }
+        delegate?.die(self, didStopOn: money)
     }
+
     
     // Prevent the die from clipping through walls
     func keepWithinWalls(
