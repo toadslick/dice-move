@@ -25,6 +25,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     var backgroundNode: SCNNode!
     
     var dice: Set<Die> = []
+    var explosions: Set<Explosion> = []
     var heldDice: [UITouch: Die] = [:]
     var delegate: Delegate?
     
@@ -111,6 +112,12 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         heldDice.forEach { (touch, die) in
             die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
+        
+        explosions.forEach { exp in
+            if exp.state == .done {
+                explosions.remove(exp)
+            }
+        }
 
         DispatchQueue.global(qos: .background).async { [weak self] in
             guard let self else { return }
@@ -196,16 +203,32 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     func die(_ die: Die, didStopOn value: Int) {
         dice.remove(die)
-        die.despawn()
         
-        guard let dieNode = die.dieNode else { return }
-        let position = sceneView.projectPoint(dieNode.presentation.worldPosition)
-        let point = CGPoint(
-            x: CGFloat(position.x),
-            y: CGFloat(position.y)
-        )
+        if
+            let rootNode = sceneView.scene?.rootNode,
+            let dieNode = die.dieNode
+        {
+            explosions.insert(.init(
+                position: dieNode.presentation.worldPosition,
+                parentNode: rootNode
+            ))
+        }
+        
+        die.despawn()
 
-        delegate?.die(die, didStopOn: value, at: point)
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard
+                let self,
+                let dieNode = die.dieNode
+            else { return }
+
+            let position = sceneView.projectPoint(dieNode.presentation.worldPosition)
+            let point = CGPoint(
+                x: CGFloat(position.x),
+                y: CGFloat(position.y)
+            )
+            delegate?.die(die, didStopOn: value, at: point)
+        }
     }
     
     
