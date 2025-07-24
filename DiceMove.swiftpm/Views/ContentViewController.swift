@@ -3,49 +3,48 @@ import UIKit
 class ContentViewController: UIViewController, DiceController.Delegate {
     override func viewDidLoad() {
         
-        title = "Dice Move"
         view.backgroundColor = .black
-                
+        
         let diceController = DiceController()
         diceController.delegate = self
         addChild(diceController)
         diceController.didMove(toParent: self)
         diceController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(diceController.view)
+
+        let titleLabel = UILabel(frame: .zero)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Dice Move"
+        titleLabel.textColor = .white
+        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textAlignment = .center
+        titleLabel.isUserInteractionEnabled = false
+        titleLabel.numberOfLines = 1
+        view.addSubview(titleLabel)
         
-        let inventoryButtonContainer = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-        inventoryButtonContainer.translatesAutoresizingMaskIntoConstraints = false
-        inventoryButtonContainer.layer.cornerRadius = 20
-        inventoryButtonContainer.layer.masksToBounds = true
-        inventoryButtonContainer.clipsToBounds = true
-        view.addSubview(inventoryButtonContainer)
-        
-        let inventoryButton = UIButton(
-            configuration: .borderless(),
-            primaryAction: .init(title: "Inventory") { [weak self] action in
-                guard let self else { return }
-                let controller = UINavigationController(rootViewController: InventoryViewController())
-                controller.traitOverrides.userInterfaceStyle = .dark
-                controller.modalPresentationStyle = .popover
-                controller.popoverPresentationController?.sourceItem = action.presentationSourceItem
-                present(controller, animated: true)
-            })
+        let inventoryButton = VibrancyButton(frame: .zero)
         inventoryButton.translatesAutoresizingMaskIntoConstraints = false
-        inventoryButton.configuration?.contentInsets = .init(top: 10, leading: 20, bottom: 10, trailing: 20)
-        inventoryButton.configuration?.buttonSize = .large
-        inventoryButton.configuration?.baseForegroundColor = .white
-        inventoryButton.backgroundColor = .clear
-        inventoryButtonContainer.contentView.addSubview(inventoryButton)
+        inventoryButton.setup(title: "Inventory", target: self, action: #selector(inventoryActtion))
+        view.addSubview(inventoryButton)
+
+        let shopButton = VibrancyButton(frame: .zero)
+        shopButton.translatesAutoresizingMaskIntoConstraints = false
+        shopButton.setup(title: "Shop", target: self, action: #selector(shopAction))
+        view.addSubview(shopButton)
+        
+        let buttonTopSpacing = 30.0
+        let buttonSideSpacing = 30.0
         
         NSLayoutConstraint.activate([
-            inventoryButtonContainer.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -30),
-            inventoryButtonContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            shopButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: buttonTopSpacing),
+            shopButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: buttonSideSpacing),
+
+            inventoryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: buttonTopSpacing),
+            inventoryButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -buttonSideSpacing),
             
-            inventoryButton.topAnchor.constraint(equalTo: inventoryButtonContainer.contentView.topAnchor),
-            inventoryButton.leftAnchor.constraint(equalTo: inventoryButtonContainer.contentView.leftAnchor),
-            inventoryButton.rightAnchor.constraint(equalTo: inventoryButtonContainer.contentView.rightAnchor),
-            inventoryButton.bottomAnchor.constraint(equalTo: inventoryButtonContainer.contentView.bottomAnchor),
-            
+            titleLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: inventoryButton.centerYAnchor),
+
             diceController.view.topAnchor.constraint(equalTo: view.topAnchor),
             diceController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             diceController.view.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -66,5 +65,17 @@ class ContentViewController: UIViewController, DiceController.Delegate {
             guard let self else { return }
             FadingDieScoreView.create(score: value, at: point, in: self.view)
         }
+    }
+    
+    @objc private func inventoryActtion(sender: UIButton) {
+        let controller = UINavigationController(rootViewController: InventoryViewController())
+        controller.traitOverrides.userInterfaceStyle = .dark
+        controller.modalPresentationStyle = .popover
+        controller.popoverPresentationController?.sourceItem = sender
+        present(controller, animated: true)
+    }
+    
+    @objc private func shopAction(sender: UIButton) {
+        
     }
 }
