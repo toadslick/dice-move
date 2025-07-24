@@ -108,7 +108,7 @@ class Die: NSObject {
         }
     }
     
-    func beginHolding(at position: SCNVector3) {
+    func beginHolding(at point: CGPoint, in sceneView: SCNView, depth: Float) {
         guard state == .resting else { return }
         state = .holding
         
@@ -118,25 +118,26 @@ class Die: NSObject {
             dieNode.simdEulerAngles = .random(in: 0...(.pi))
         }
 
-        continueHolding(at: position)
+        continueHolding(at: point, in: sceneView, depth: depth)
     }
     
-    func continueHolding(at position: SCNVector3) {
+    func continueHolding(at point: CGPoint, in sceneView: SCNView, depth: Float) {
         guard
             state == .holding,
             let dieNode
         else { return }
         
         DispatchQueue.global(qos: .userInteractive).async {
+            let position = Self.viewPointToScene(point, sceneView: sceneView, depth: depth)
             dieNode.position = position
             dieNode.physicsBody?.velocity = .init(0, 0, 0)
             dieNode.physicsBody?.angularVelocity = .init(0, 0, 0, 0)
         }
     }
     
-    func beginRolling(velocity: CGPoint, at position: SCNVector3) {
+    func beginRolling(velocity: CGPoint, at point: CGPoint, in sceneView: SCNView, depth: Float) {
         guard state == .holding else { return }
-        continueHolding(at: position)
+        continueHolding(at: point, in: sceneView, depth: depth)
         state = .rolling
         
         DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
@@ -241,5 +242,10 @@ class Die: NSObject {
             dieNode.removeAllParticleSystems()
             dieNode.removeFromParentNode()
         }
+    }
+    
+    private static func viewPointToScene(_ viewPoint: CGPoint, sceneView: SCNView, depth: Float) -> SCNVector3 {
+        let scenePoint = sceneView.unprojectPoint(.init(x: Float(viewPoint.x), y: Float(viewPoint.y), z: 0))
+        return .init(x: scenePoint.x * depth, y: 0, z: scenePoint.z * depth)
     }
 }

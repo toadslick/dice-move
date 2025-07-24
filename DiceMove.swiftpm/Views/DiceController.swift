@@ -153,7 +153,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         
         for touch in touches {
             let die: Die
-            let touchLocation = touch.location(in: sceneView)
             
             let percent = Float.random(in: 0...1)
             if percent > 0.98 {
@@ -166,7 +165,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             die.delegate = self
             dice.insert(die)
             heldDice[touch] = die
-            die.beginHolding(at: viewPointToScene(touch.location(in: sceneView)))
+            die.beginHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     
@@ -174,8 +173,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         super.touchesMoved(touches, with: event)
         
         for touch in touches {
-            let position = viewPointToScene(touch.location(in: sceneView))
-            heldDice[touch]?.continueHolding(at: position)
+            heldDice[touch]?.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     
@@ -189,7 +187,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             heldDice[touch]?.beginRolling(velocity: .init(
                 x: CGFloat(currentLocation.x - previousLocation.x),
                 y: CGFloat(currentLocation.z - previousLocation.z)
-            ), at: currentLocation)
+            ), at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
             heldDice.removeValue(forKey: touch)
         }
     }
