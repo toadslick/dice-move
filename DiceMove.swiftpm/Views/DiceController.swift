@@ -40,7 +40,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         sceneView = (self.view as! SCNView)
         sceneView.delegate = self
         sceneView.autoenablesDefaultLighting = true
-        sceneView.backgroundColor = UIColor.clear
+        sceneView.backgroundColor = UIColor.black
         sceneView.contentMode = .center
         
         let scene = SCNScene()
@@ -165,7 +165,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             die.delegate = self
             dice.insert(die)
             heldDice[touch] = die
-            die.beginHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
+            die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
         }
     }
     
