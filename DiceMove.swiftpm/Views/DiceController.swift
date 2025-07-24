@@ -72,7 +72,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             aroundTarget: simd_float3(x: 0, y: 0, z: 0)
         )
         backgroundNode.position = .init(x: 0, y: -10, z: 0)
-        backgroundNode.opacity = 1
         backgroundNode.geometry?.firstMaterial?.isDoubleSided = true
         setBackground()
         
@@ -233,6 +232,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         let size = 30.0
         let node = SCNNode(geometry: SCNPlane(width: size, height: size))
         node.opacity = 0
+        node.geometry?.firstMaterial?.diffuse.contents = UIColor.black
         node.physicsBody = .init(type: .static, shape: .init(
             geometry: SCNPlane(width: size, height: size)
         ))
@@ -250,7 +250,18 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     private func setBackground() {
         DispatchQueue.global(qos: .background).async { [unowned self] in
-            backgroundNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: InventoryCategory.backgrounds.currentItem)
+            let image = UIImage(named: InventoryCategory.backgrounds.currentItem)
+            backgroundNode.geometry?.firstMaterial?.diffuse.contents = image
+            
+            let animation = CABasicAnimation(keyPath: "opacity")
+            animation.fromValue = backgroundNode.opacity
+            animation.toValue = 1.0
+            animation.duration = 2
+            animation.autoreverses = false
+            animation.repeatCount = .zero
+            animation.isRemovedOnCompletion = true
+            backgroundNode.addAnimation(animation, forKey: nil)
+            backgroundNode.opacity = 1
         }
     }
     
@@ -258,3 +269,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         UserDefaults.standard.removeObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey)
     }
 }
+
+
+
