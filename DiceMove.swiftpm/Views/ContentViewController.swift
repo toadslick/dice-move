@@ -5,21 +5,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         
         title = "Dice Move"
         view.backgroundColor = .black
-        
-        navigationItem.rightBarButtonItem = .init(
-            title: "Inventory",
-            style: .plain,
-            target: self,
-            action: #selector(inventoryAction)
-        )
-        
-        let appearance = UINavigationBarAppearance()
-        appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-        appearance.backgroundColor = .clear
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
-        
+                
         let diceController = DiceController()
         diceController.delegate = self
         addChild(diceController)
@@ -27,7 +13,39 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         diceController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(diceController.view)
         
+        let inventoryButtonContainer = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+        inventoryButtonContainer.translatesAutoresizingMaskIntoConstraints = false
+        inventoryButtonContainer.layer.cornerRadius = 20
+        inventoryButtonContainer.layer.masksToBounds = true
+        inventoryButtonContainer.clipsToBounds = true
+        view.addSubview(inventoryButtonContainer)
+        
+        let inventoryButton = UIButton(
+            configuration: .borderless(),
+            primaryAction: .init(title: "Inventory") { [weak self] action in
+                guard let self else { return }
+                let controller = UINavigationController(rootViewController: InventoryViewController())
+                controller.traitOverrides.userInterfaceStyle = .dark
+                controller.modalPresentationStyle = .popover
+                controller.popoverPresentationController?.sourceItem = action.presentationSourceItem
+                present(controller, animated: true)
+            })
+        inventoryButton.translatesAutoresizingMaskIntoConstraints = false
+        inventoryButton.configuration?.contentInsets = .init(top: 10, leading: 20, bottom: 10, trailing: 20)
+        inventoryButton.configuration?.buttonSize = .large
+        inventoryButton.configuration?.baseForegroundColor = .white
+        inventoryButton.backgroundColor = .clear
+        inventoryButtonContainer.contentView.addSubview(inventoryButton)
+        
         NSLayoutConstraint.activate([
+            inventoryButtonContainer.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -30),
+            inventoryButtonContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            
+            inventoryButton.topAnchor.constraint(equalTo: inventoryButtonContainer.contentView.topAnchor),
+            inventoryButton.leftAnchor.constraint(equalTo: inventoryButtonContainer.contentView.leftAnchor),
+            inventoryButton.rightAnchor.constraint(equalTo: inventoryButtonContainer.contentView.rightAnchor),
+            inventoryButton.bottomAnchor.constraint(equalTo: inventoryButtonContainer.contentView.bottomAnchor),
+            
             diceController.view.topAnchor.constraint(equalTo: view.topAnchor),
             diceController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             diceController.view.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -49,15 +67,4 @@ class ContentViewController: UIViewController, DiceController.Delegate {
             FadingDieScoreView.create(score: value, at: point, in: self.view)
         }
     }
-    
-    // MARK: button actions
-    
-    @objc private func inventoryAction(sender: UIBarButtonItem) {
-        let controller = UINavigationController(rootViewController: InventoryViewController())
-        controller.traitOverrides.userInterfaceStyle = .dark
-        controller.modalPresentationStyle = .popover
-        controller.popoverPresentationController?.sourceItem = sender
-        present(controller, animated: true)
-    }
-
 }

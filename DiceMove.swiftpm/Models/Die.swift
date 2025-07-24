@@ -22,7 +22,7 @@ class Die: NSObject {
         .init( 0,  0, -1),
     ]
     
-    private static let velocityFactor: Float = 2000 // TODO: calculate based on frame rate
+    private static let velocityFactor: Float = 3000 // TODO: calculate based on frame rate
     
     var dieNode: SCNNode?
     private var faceNodes: [SCNNode]?

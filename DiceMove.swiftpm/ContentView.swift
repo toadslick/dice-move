@@ -3,13 +3,13 @@ import SceneKit
 
 struct ContentView: UIViewControllerRepresentable {
 
-    func makeUIViewController(context: Context) -> UINavigationController {
-        let controller = UINavigationController(rootViewController: ContentViewController())
+    func makeUIViewController(context: Context) -> ContentViewController {
+        let controller = ContentViewController()
         controller.traitOverrides.userInterfaceStyle = .dark
         return controller
     }
     
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+    func updateUIViewController(_ uiViewController: ContentViewController, context: Context) {
         
     }
 }
