@@ -75,13 +75,12 @@ class InventoryCategory {
         ]
     )
 
-    
     static var all: [InventoryCategory] = [
         faces,
         skins,
         trails,
         auras,
-        explosions,
+//        explosions,
         backgrounds,
     ]
     
