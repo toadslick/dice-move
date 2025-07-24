@@ -61,9 +61,10 @@ class InventoryViewController:
         category.items.indices.forEach { index in
             let indexPath = IndexPath(row: index, section: indexPath.section)
             let isSelected = isSelected(at: indexPath)
-            let cell = tableView.cellForRow(at: indexPath)!
-            cell.accessoryType = isSelected ? .checkmark : .none
-            cell.setSelected(false, animated: true) // Remove the highlight but not the checkmark
+            if let cell = tableView.cellForRow(at: indexPath) {
+                cell.accessoryType = isSelected ? .checkmark : .none
+                cell.setSelected(false, animated: true) // Remove the highlight but not the checkmark
+            }
         }
     }
     

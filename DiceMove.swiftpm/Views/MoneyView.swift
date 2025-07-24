@@ -22,6 +22,7 @@ struct MoneyView: View {
         .padding(.vertical, 5)
         .background(.ultraThinMaterial)
         .cornerRadius(10)
+        .padding(30)
         .allowsHitTesting(false)
     }
 }
