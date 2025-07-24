@@ -60,9 +60,13 @@ class ContentViewController: UIViewController, DiceController.Delegate {
     
     func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
         Game.shared.money += value
-        
+
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
+            guard
+                let self,
+                !point.x.isNaN,
+                !point.y.isNaN
+            else { return }
             FadingDieScoreView.create(score: value, at: point, in: self.view)
         }
     }

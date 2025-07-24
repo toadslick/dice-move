@@ -161,7 +161,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         
         for touch in touches {
             let die: Die
-            
             let percent = Float.random(in: 0...1)
             if percent > 0.98 {
                 die = Die(parentNode: rootNode, textureName: "Explosion", overrideFaceValues: [
@@ -205,6 +204,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             x: CGFloat(position.x),
             y: CGFloat(position.y)
         )
+
         delegate?.die(die, didStopOn: value, at: point)
     }
     
