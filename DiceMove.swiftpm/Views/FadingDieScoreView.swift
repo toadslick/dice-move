@@ -13,7 +13,7 @@ class FadingDieScoreView: UIView {
             x: origin.x - (size / 2),
             y: origin.y - (size / 2),
             width: size,
-            height: size,
+            height: size
         )
         superview.addSubview(view)
         

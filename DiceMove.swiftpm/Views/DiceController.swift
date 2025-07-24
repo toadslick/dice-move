@@ -146,57 +146,51 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            guard
-                let rootNode = sceneView.scene?.rootNode,
-                dice.count < Self.maxDice
-            else { return }
+        guard
+            let rootNode = sceneView.scene?.rootNode,
+            dice.count < Self.maxDice
+        else { return }
+        
+        for touch in touches {
+            let die: Die
+            let touchLocation = touch.location(in: sceneView)
             
-            for touch in touches {
-                let position = viewPointToScene(touch.location(in: sceneView))
-                let die: Die
-                let percent = Float.random(in: 0...1)
-                if percent > 0.98 {
-                    die = Die(in: rootNode, assetName: "Explosion", worth: [
-                        1000, 1000, 1000, 3000, 1000, 1000,
-                    ])
-                } else {
-                    die = Die(in: rootNode, assetName: InventoryCategory.faces.currentItem)
-                }
-                
-                die.delegate = self
-                dice.insert(die)
-                heldDice[touch] = die
-                die.beginHolding(at: position)
+            let percent = Float.random(in: 0...1)
+            if percent > 0.98 {
+                die = Die(parentNode: rootNode, textureName: "Explosion", overrideFaceValues: [
+                    1000, 1000, 1000, 3000, 1000, 1000,
+                ])
+            } else {
+                die = Die(parentNode: rootNode, textureName: InventoryCategory.faces.currentItem)
             }
+            die.delegate = self
+            dice.insert(die)
+            heldDice[touch] = die
+            die.beginHolding(at: viewPointToScene(touch.location(in: sceneView)))
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesMoved(touches, with: event)
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            for touch in touches {
-                let position = viewPointToScene(touch.location(in: sceneView))
-                heldDice[touch]?.continueHolding(at: position)
-            }
+        for touch in touches {
+            let position = viewPointToScene(touch.location(in: sceneView))
+            heldDice[touch]?.continueHolding(at: position)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            for touch in touches {
-                let currentLocation = viewPointToScene(touch.location(in: sceneView))
-                let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
-                
-                heldDice[touch]?.beginRolling(velocity: .init(
-                    x: CGFloat(currentLocation.x - previousLocation.x),
-                    y: CGFloat(currentLocation.z - previousLocation.z)
-                ), at: currentLocation)
-                heldDice.removeValue(forKey: touch)
-            }
+        for touch in touches {
+            let currentLocation = viewPointToScene(touch.location(in: sceneView))
+            let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
+            
+            heldDice[touch]?.beginRolling(velocity: .init(
+                x: CGFloat(currentLocation.x - previousLocation.x),
+                y: CGFloat(currentLocation.z - previousLocation.z)
+            ), at: currentLocation)
+            heldDice.removeValue(forKey: touch)
         }
     }
     
@@ -209,16 +203,15 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     func die(_ die: Die, didStopOn value: Int) {
         dice.remove(die)
-
-        DispatchQueue.global(qos: .background).async { [unowned self] in
-            die.despawn()
-            let position = sceneView.projectPoint(die.dieNode.presentation.worldPosition)
-            let point = CGPoint(
-                x: CGFloat(position.x),
-                y: CGFloat(position.y)
-            )
-            delegate?.die(die, didStopOn: value, at: point)
-        }
+        die.despawn()
+        
+        guard let dieNode = die.dieNode else { return }
+        let position = sceneView.projectPoint(dieNode.presentation.worldPosition)
+        let point = CGPoint(
+            x: CGFloat(position.x),
+            y: CGFloat(position.y)
+        )
+        delegate?.die(die, didStopOn: value, at: point)
     }
     
     

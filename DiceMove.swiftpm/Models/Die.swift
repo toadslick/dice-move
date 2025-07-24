@@ -24,17 +24,18 @@ class Die: NSObject {
     
     private static let velocityFactor: Float = 2000 // TODO: calculate based on frame rate
     
-    let dieNode: SCNNode
-    let faceNodes: [SCNNode]
-    let surfaceNode: SCNNode
+    var dieNode: SCNNode?
+    private var faceNodes: [SCNNode]?
+    private var surfaceNode: SCNNode?
     
-    private let worth: [Int]?
-    
+    private var overrideFaceValues: [Int]?
     var delegate: Delegate?
     
     public private(set) var state = State.resting
     
     var value: Int {
+        guard let faceNodes else { return 0 }
+        
         let upwardFaceNode = faceNodes.sorted(by: {
             $0.presentation.worldPosition.y > $1.presentation.worldPosition.y
         }).first!
@@ -45,74 +46,92 @@ class Die: NSObject {
         .init(resource: .init(name: InventoryCategory.skins.currentItem, bundle: .main))
     }
     
-    init(in parentNode: SCNNode, assetName: String, worth: [Int]? = nil) {
-        self.worth = worth
-        
-        let asset = MDLAsset(url: Bundle.main.url(forResource: assetName, withExtension: "usdz")!)
-        asset.loadTextures()
-        
-        dieNode = SCNNode(mdlObject: asset.object(at: 0))
-        dieNode.name = "die"
-        dieNode.simdScale = .init(2, 2, 2)
-        dieNode.position = .init(x: 0, y: 0, z: 0)
-        dieNode.opacity = 0
-        
-        dieNode.physicsBody = .init(type: .dynamic, shape: .init(
-            geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
-            options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
-        ))
-        dieNode.physicsBody!.friction = 1
-        dieNode.physicsBody!.continuousCollisionDetectionThreshold = 0.5
-        dieNode.physicsBody!.rollingFriction = 0
-        dieNode.physicsBody!.mass = 4
-        dieNode.physicsBody!.linearRestingThreshold = 10
-        dieNode.physicsBody!.angularRestingThreshold = 3
-        dieNode.physicsBody!.restitution = 0.9
-        parentNode.addChildNode(dieNode)
-        
-        surfaceNode = SCNNode(geometry: SCNBox(width: 0.302, height: 0.302, length: 0.302, chamferRadius: 0.02))
-        surfaceNode.position = .init(0, 0, 0)
-        dieNode.addChildNode(surfaceNode)
-        
-        faceNodes = Die.facePositions.map {
-            let node = SCNNode()
-            node.position = $0
-            return node
-        }
-        
-        faceNodes.forEach(dieNode.addChildNode)
-        
+    init(
+        parentNode: SCNNode,
+        textureName: String,
+        overrideFaceValues: [Int]? = nil
+    ) {
+        self.overrideFaceValues = overrideFaceValues
         super.init()
         
-        surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
-        
-        let animation = CABasicAnimation(keyPath: "opacity")
-        animation.fromValue = 0.0
-        animation.toValue = 1.0
-        animation.duration = 0.1
-        animation.autoreverses = false
-        animation.repeatCount = .zero
-        animation.isRemovedOnCompletion = true
-        dieNode.addAnimation(animation, forKey: nil)
-        
-        dieNode.opacity = 1
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            let asset = MDLAsset(url: Bundle.main.url(forResource: textureName, withExtension: "usdz")!)
+            asset.loadTextures()
+            
+            dieNode = SCNNode(mdlObject: asset.object(at: 0))
+            guard let dieNode else { return }
+            dieNode.name = "die"
+            dieNode.simdScale = .init(2, 2, 2)
+            dieNode.position = .init(x: 0, y: 0, z: 0)
+            dieNode.opacity = 0
+            
+            dieNode.physicsBody = .init(type: .dynamic, shape: .init(
+                geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
+                options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
+            ))
+            dieNode.physicsBody!.friction = 1
+            dieNode.physicsBody!.continuousCollisionDetectionThreshold = 0.5
+            dieNode.physicsBody!.rollingFriction = 0
+            dieNode.physicsBody!.mass = 4
+            dieNode.physicsBody!.linearRestingThreshold = 10
+            dieNode.physicsBody!.angularRestingThreshold = 3
+            dieNode.physicsBody!.restitution = 0.9
+            parentNode.addChildNode(dieNode)
+            
+            surfaceNode = SCNNode(geometry: SCNBox(width: 0.302, height: 0.302, length: 0.302, chamferRadius: 0.02))
+            guard let surfaceNode else { return }
+            
+            surfaceNode.position = .init(0, 0, 0)
+            dieNode.addChildNode(surfaceNode)
+            
+            faceNodes = Die.facePositions.map {
+                let node = SCNNode()
+                node.position = $0
+                return node
+            }
+            guard let faceNodes else { return }
+            
+            faceNodes.forEach(dieNode.addChildNode)
+            
+            surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
+            
+            let animation = CABasicAnimation(keyPath: "opacity")
+            animation.fromValue = 0.0
+            animation.toValue = 1.0
+            animation.duration = 0.1
+            animation.autoreverses = false
+            animation.repeatCount = .zero
+            animation.isRemovedOnCompletion = true
+            dieNode.addAnimation(animation, forKey: nil)
+            
+            dieNode.opacity = 1
+        }
     }
     
     func beginHolding(at position: SCNVector3) {
         guard state == .resting else { return }
         state = .holding
         
-        dieNode.physicsBody!.type = .kinematic
-        dieNode.simdEulerAngles = .random(in: 0...(.pi))
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            guard let dieNode else { return }
+            dieNode.physicsBody!.type = .kinematic
+            dieNode.simdEulerAngles = .random(in: 0...(.pi))
+        }
+
         continueHolding(at: position)
     }
     
     func continueHolding(at position: SCNVector3) {
-        guard state == .holding else { return }
+        guard
+            state == .holding,
+            let dieNode
+        else { return }
         
-        dieNode.position = position
-        dieNode.physicsBody?.velocity = .init(0, 0, 0)
-        dieNode.physicsBody?.angularVelocity = .init(0, 0, 0, 0)
+        DispatchQueue.global(qos: .userInteractive).async {
+            dieNode.position = position
+            dieNode.physicsBody?.velocity = .init(0, 0, 0)
+            dieNode.physicsBody?.angularVelocity = .init(0, 0, 0, 0)
+        }
     }
     
     func beginRolling(velocity: CGPoint, at position: SCNVector3) {
@@ -120,42 +139,52 @@ class Die: NSObject {
         continueHolding(at: position)
         state = .rolling
         
-        dieNode.physicsBody!.type = .dynamic
-        
-        let vx = Float(velocity.x) * Self.velocityFactor
-        let vy = Float(velocity.y) * Self.velocityFactor
-        dieNode.physicsBody!.applyForce(.init(vx, 0, vy), asImpulse: false)
-        
-        // Apply a random angular force
-        let minTorque = 0.05
-        let maxTorque = 0.5
-        dieNode.physicsBody!.applyTorque(.init(
-            .random(in: minTorque...maxTorque),
-            .random(in: minTorque...maxTorque),
-            .random(in: minTorque...maxTorque),
-            .random(in: minTorque...maxTorque)
-        ), asImpulse: true)
-        
-        if
-            (dieNode.particleSystems ?? []).isEmpty,
-            let particle = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil),
-            let aura = SCNParticleSystem(named: "\(InventoryCategory.auras.currentItem).scnp", inDirectory: nil)
-        {
-            dieNode.addParticleSystem(particle)
-            dieNode.addParticleSystem(aura)
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            guard let dieNode else { return
+            }
+            dieNode.physicsBody!.type = .dynamic
+            
+            let vx = Float(velocity.x) * Self.velocityFactor
+            let vy = Float(velocity.y) * Self.velocityFactor
+            dieNode.physicsBody!.applyForce(.init(vx, 0, vy), asImpulse: false)
+            
+            // Apply a random angular force
+            let minTorque = 0.05
+            let maxTorque = 0.5
+            dieNode.physicsBody!.applyTorque(.init(
+                .random(in: minTorque...maxTorque),
+                .random(in: minTorque...maxTorque),
+                .random(in: minTorque...maxTorque),
+                .random(in: minTorque...maxTorque)
+            ), asImpulse: true)
+            
+            if
+                (dieNode.particleSystems ?? []).isEmpty,
+                let particle = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil),
+                let aura = SCNParticleSystem(named: "\(InventoryCategory.auras.currentItem).scnp", inDirectory: nil)
+            {
+                dieNode.addParticleSystem(particle)
+                dieNode.addParticleSystem(aura)
+            }
         }
     }
     
     func maybeBeginResting() {
-        guard state == .rolling else { return }
+        guard
+            state == .rolling,
+            let dieNode
+        else { return }
         
         if (dieNode.physicsBody!.isResting) {
             state = .resting
             
-            dieNode.removeAllParticleSystems()
+            DispatchQueue.global().async {
+                dieNode.removeAllParticleSystems()
+            }
+            
             var money = value
-            if let worth {
-                money = worth[value - 1]
+            if let overrideFaceValues {
+                money = overrideFaceValues[value - 1]
             }
             delegate?.die(self, didStopOn: money)
         }
@@ -170,6 +199,8 @@ class Die: NSObject {
         floor floorNode: SCNNode,
         ceiling ceilingNode: SCNNode
     ) {
+        guard let dieNode else { return }
+        
         var x = dieNode.presentation.worldPosition.x
         var y = dieNode.presentation.worldPosition.y
         var z = dieNode.presentation.worldPosition.z
@@ -204,7 +235,11 @@ class Die: NSObject {
     }
     
     func despawn() {
-        dieNode.removeAllParticleSystems()
-        dieNode.removeFromParentNode()
+        guard let dieNode else { return }
+        
+        DispatchQueue.global().async {
+            dieNode.removeAllParticleSystems()
+            dieNode.removeFromParentNode()
+        }
     }
 }
