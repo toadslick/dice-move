@@ -155,8 +155,6 @@ class Die: NSObject {
             dieNode.physicsBody?.isResting ?? false
         else { return }
         state = .resting
-
-        dieNode.removeAllParticleSystems()
         
         var money = value
         if let overrideFaceValues {
@@ -213,9 +211,28 @@ class Die: NSObject {
     func despawn() {
         guard let dieNode else { return }
         
-        DispatchQueue.global().async {
-            dieNode.removeAllParticleSystems()
-            dieNode.removeFromParentNode()
+        let fadeDuration = 0.25
+        
+        dieNode.physicsBody?.type = .static
+        dieNode.particleSystems?.forEach { ps in
+            ps.birthRate = 0
+        }
+        
+        let animation = CABasicAnimation(keyPath: "opacity")
+        animation.fromValue = 1
+        animation.toValue = 0
+        animation.duration = fadeDuration
+        animation.autoreverses = false
+        animation.repeatCount = .zero
+        animation.isRemovedOnCompletion = true
+        dieNode.addAnimation(animation, forKey: nil)
+        dieNode.opacity = 0
+
+        let _ = Timer(timeInterval: fadeDuration, repeats: false) { timer in
+            DispatchQueue.global().async {
+                dieNode.removeAllParticleSystems()
+                dieNode.removeFromParentNode()
+            }
         }
     }
     
