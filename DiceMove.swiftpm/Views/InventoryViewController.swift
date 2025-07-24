@@ -49,6 +49,7 @@ class InventoryViewController:
         cell.textLabel?.text = item
         cell.selectionStyle = .default
         cell.accessoryType = isSelected ? .checkmark : .none
+        cell.backgroundColor = .black.withAlphaComponent(0.2)
         
         return cell
     }

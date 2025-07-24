@@ -68,7 +68,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
     }
     
     @objc private func inventoryActtion(sender: UIButton) {
-        let controller = UINavigationController(rootViewController: InventoryViewController())
+        let controller = InventoryViewController()
         controller.traitOverrides.userInterfaceStyle = .dark
         controller.modalPresentationStyle = .popover
         controller.popoverPresentationController?.sourceItem = sender

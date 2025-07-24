@@ -26,7 +26,7 @@ class InventoryCategory {
         ]
     )
     
-    static var particles: InventoryCategory = .init(
+    static var trails: InventoryCategory = .init(
         title: "Trail",
         defaultValue: "None",
         storageKey: "trail",
@@ -64,14 +64,25 @@ class InventoryCategory {
             "Vortex",
         ]
     )
+    
+    static var explosions: InventoryCategory = .init(
+        title: "Explosion",
+        defaultValue: "None",
+        storageKey: "explosion",
+        items: [
+            "None",
+            "Boom",
+        ]
+    )
 
     
     static var all: [InventoryCategory] = [
         faces,
         skins,
-        particles,
+        trails,
+        auras,
+        explosions,
         backgrounds,
-        auras
     ]
     
     init(title: String, defaultValue: String, storageKey: String, items: [String]) {

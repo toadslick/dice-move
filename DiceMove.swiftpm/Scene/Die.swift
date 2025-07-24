@@ -63,6 +63,7 @@ class Die: NSObject {
             geometry: SCNBox(width: 0.5, height: 0.5, length: 0.5, chamferRadius: 0),
             options: [.type: SCNPhysicsShape.ShapeType.boundingBox]
         ))
+        dieNode.physicsBody?.isAffectedByGravity = false
         dieNode.physicsBody?.friction = 1
         dieNode.physicsBody?.continuousCollisionDetectionThreshold = 0.5
         dieNode.physicsBody?.rollingFriction = 0
@@ -122,6 +123,8 @@ class Die: NSObject {
         DispatchQueue.global(qos: .userInteractive).async { [weak dieNode] in
             guard let dieNode else { return }
             
+            dieNode.physicsBody?.isAffectedByGravity = true
+
             let vx = Float(velocity.x) * Self.velocityFactor
             let vy = Float(velocity.y) * Self.velocityFactor
             dieNode.physicsBody?.applyForce(.init(vx, 0, vy), asImpulse: false)
@@ -138,7 +141,7 @@ class Die: NSObject {
             
             if
                 (dieNode.particleSystems ?? []).isEmpty,
-                let particle = SCNParticleSystem(named: "\(InventoryCategory.particles.currentItem).scnp", inDirectory: nil),
+                let particle = SCNParticleSystem(named: "\(InventoryCategory.trails.currentItem).scnp", inDirectory: nil),
                 let aura = SCNParticleSystem(named: "\(InventoryCategory.auras.currentItem).scnp", inDirectory: nil)
             {
                 dieNode.addParticleSystem(particle)
