@@ -57,8 +57,11 @@ class InventoryCategory {
         storageKey: "aura",
         items: [
             "None",
-            "Celestial",
+            "Sunburst",
             "Oblivion",
+            "Radioactive",
+            "Corona",
+            "Vortex",
         ]
     )
 
