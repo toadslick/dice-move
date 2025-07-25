@@ -3,7 +3,12 @@ import QuartzCore
 import SceneKit
 import SceneKit.ModelIO
 
-class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
+class DiceController: UIViewController, SCNSceneRendererDelegate {
+    
+    enum State {
+        case initializing
+        case running
+    }
     
     protocol Delegate {
         func die(_ die: Die, didStopOn value: Int, at point: CGPoint)
@@ -12,21 +17,23 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     private static let maxDice = 17
     
-    var sceneFrame: CGRect!
-    var sceneView: SCNView!
-    var cameraNode: SCNNode!
+    private var sceneFrame: CGRect!
+    private var sceneView: SCNView!
+    private var cameraNode: SCNNode!
     
-    var topWallNode: SCNNode!
-    var leftWallNode: SCNNode!
-    var bottomWallNode: SCNNode!
-    var rightWallNode: SCNNode!
-    var floorNode: SCNNode!
-    var ceilingNode: SCNNode!
-    var backgroundNode: SCNNode!
+    private var topWallNode: SCNNode!
+    private var leftWallNode: SCNNode!
+    private var bottomWallNode: SCNNode!
+    private var rightWallNode: SCNNode!
+    private var floorNode: SCNNode!
+    private var ceilingNode: SCNNode!
+    private var backgroundNode: SCNNode!
     
-    var dice: Set<Die> = []
-    var explosions: Set<Explosion> = []
-    var heldDice: [UITouch: Die] = [:]
+    private var dice: Set<Die> = []
+    private var explosions: Set<Explosion> = []
+    private var heldDice: [UITouch: Die] = [:]
+    private var state: State = .initializing
+    
     var delegate: Delegate?
     
     override func loadView() {
@@ -43,6 +50,52 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         sceneView.autoenablesDefaultLighting = true
         sceneView.backgroundColor = UIColor.black
         sceneView.contentMode = .center
+    }
+    
+    override func viewDidLayoutSubviews() {
+        sceneFrame = sceneView.frame
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        .all
+    }
+    
+    func renderer(_ renderer: any SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        
+        if state == .initializing {
+            renderInitial()
+        }
+        renderWalls()
+        renderBackground()
+        
+        dice.forEach { die in
+            die.render(at: viewPointToScene(die.touchLocation))
+            
+            die.renderWithinWalls(
+                top: topWallNode,
+                bottom: bottomWallNode,
+                left: leftWallNode,
+                right: rightWallNode,
+                floor: floorNode,
+                ceiling: ceilingNode
+            )
+            
+            if die.state == .resting {
+                renderExplosion(for: die)
+                derender(die: die)
+            }
+        }
+        
+        explosions.forEach { exp in
+            if exp.state == .done {
+                explosions.remove(exp)
+            }
+        }
+    }
+    
+    private func renderInitial() {
+        guard state == .initializing else { return }
+        state = .running
         
         let scene = SCNScene()
         scene.physicsWorld.speed = 1.5
@@ -100,69 +153,56 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         )
     }
     
-    override func viewDidLayoutSubviews() {
-        sceneFrame = sceneView.frame
-    }
-    
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        .all
-    }
-    
-    func renderer(_ renderer: any SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        heldDice.forEach { (touch, die) in
-            die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
-        }
+    // Update the position of the walls to match the viewport.
+    private func renderWalls() {
+        let wallOffset = 30.0
         
-        explosions.forEach { exp in
-            if exp.state == .done {
-                explosions.remove(exp)
-            }
-        }
-        
-        dice.forEach { die in
-            die.maybeBeginResting()
-        }
+        let topLeftPoint = CGPoint(x: sceneFrame.minX - wallOffset, y: sceneFrame.minY - wallOffset)
+        let topLeftPosition = viewPointToScene(topLeftPoint)
+        let bottomRightPoint = CGPoint(x: sceneFrame.maxX + wallOffset, y: sceneFrame.maxY + wallOffset)
+        let bottomRightPosition = viewPointToScene(bottomRightPoint)
 
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self else { return }
-            
-            let wallOffset = 30.0
-            
-            // Update the position of the walls to match the viewport.
-            let topLeftPoint = CGPoint(x: sceneFrame.minX - wallOffset, y: sceneFrame.minY - wallOffset)
-            let topLeftPosition = viewPointToScene(topLeftPoint)
-            let bottomRightPoint = CGPoint(x: sceneFrame.maxX + wallOffset, y: sceneFrame.maxY + wallOffset)
-            let bottomRightPosition = viewPointToScene(bottomRightPoint)
-            leftWallNode.position = topLeftPosition
-            topWallNode.position = topLeftPosition
-            rightWallNode.position = bottomRightPosition
-            bottomWallNode.position = bottomRightPosition
-            
-            // Resize the background node to aspect-fill the view.
-            let topLeft = viewPointToScene(.zero, additionalDepth: 10)
-            let bottomRight = viewPointToScene(.init(x: sceneFrame.width, y: sceneFrame.height), additionalDepth: 10)
-            let targetSize = max(bottomRight.x - topLeft.x, bottomRight.z - topLeft.z)
-            let currentWidth = (backgroundNode.boundingBox.max.x - backgroundNode.boundingBox.min.x)
-            let currentHeight = (backgroundNode.boundingBox.max.y - backgroundNode.boundingBox.min.y)
-            backgroundNode.scale = .init(
-                x: targetSize / currentWidth,
-                y: targetSize / currentHeight,
-                z: 1
-            )
-            
-            for die in dice {
-                die.keepWithinWalls(
-                    top: topWallNode,
-                    bottom: bottomWallNode,
-                    left: leftWallNode,
-                    right: rightWallNode,
-                    floor: floorNode,
-                    ceiling: ceilingNode
-                )
-            }
-        }
+        leftWallNode.position = topLeftPosition
+        topWallNode.position = topLeftPosition
+        rightWallNode.position = bottomRightPosition
+        bottomWallNode.position = bottomRightPosition
     }
     
+    private func renderBackground() {
+        // Resize the background node to aspect-fill the view.
+        let topLeft = viewPointToScene(.zero, additionalDepth: 10)
+        let bottomRight = viewPointToScene(.init(x: sceneFrame.width, y: sceneFrame.height), additionalDepth: 10)
+        let targetSize = max(bottomRight.x - topLeft.x, bottomRight.z - topLeft.z)
+        let currentWidth = (backgroundNode.boundingBox.max.x - backgroundNode.boundingBox.min.x)
+        let currentHeight = (backgroundNode.boundingBox.max.y - backgroundNode.boundingBox.min.y)
+        backgroundNode.scale = .init(
+            x: targetSize / currentWidth,
+            y: targetSize / currentHeight,
+            z: 1
+        )
+    }
+    
+    private func renderExplosion(for die: Die) {
+        guard
+            let position = die.dieNode?.presentation.worldPosition,
+            let rootNode = sceneView.scene?.rootNode
+        else { return }
+        explosions.insert(.init(position: position, parentNode: rootNode))
+    }
+
+    private func derender(die: Die) {
+        if let dieNode = die.dieNode {
+            let viewPoint = sceneView.projectPoint(dieNode.presentation.worldPosition)
+            delegate?.die(die, didStopOn: die.value, at: .init(
+                x: Double(viewPoint.x),
+                y: Double(viewPoint.y)
+            ))
+        }
+        
+        die.derender()
+        dice.remove(die)
+    }
+        
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard
             let rootNode = sceneView.scene?.rootNode,
@@ -179,22 +219,32 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
             } else {
                 die = Die(parentNode: rootNode, textureName: Loot.faces.currentItem)
             }
-            die.delegate = self
             dice.insert(die)
             heldDice[touch] = die
-            die.continueHolding(at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
+            
+            let location = touch.location(in: sceneView)
+            die.updateHolding(location: location, previousLocation: location)
+        }
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            guard let die = heldDice[touch] else { continue }
+            die.updateHolding(
+                location: touch.location(in: sceneView),
+                previousLocation: touch.previousLocation(in: sceneView)
+            )
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            let currentLocation = viewPointToScene(touch.location(in: sceneView))
-            let previousLocation = viewPointToScene(touch.previousLocation(in: sceneView))
-            
-            heldDice[touch]?.beginRolling(velocity: .init(
-                x: CGFloat(currentLocation.x - previousLocation.x),
-                y: CGFloat(currentLocation.z - previousLocation.z)
-            ), at: touch.location(in: sceneView), in: sceneView, depth: cameraNode.position.y)
+            guard let die = heldDice[touch] else { continue }
+            die.updateHolding(
+                location: touch.location(in: sceneView),
+                previousLocation: touch.previousLocation(in: sceneView),
+                isHolding: false
+            )
             heldDice.removeValue(forKey: touch)
         }
     }
@@ -202,36 +252,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         touchesEnded(touches, with: event)
-    }
-    
-    func die(_ die: Die, didStopOn value: Int) {
-        dice.remove(die)
-        
-        if
-            let rootNode = sceneView.scene?.rootNode,
-            let dieNode = die.dieNode
-        {
-            explosions.insert(.init(
-                position: dieNode.presentation.worldPosition,
-                parentNode: rootNode
-            ))
-        }
-        
-        die.despawn()
-
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard
-                let self,
-                let dieNode = die.dieNode
-            else { return }
-
-            let position = sceneView.projectPoint(dieNode.presentation.worldPosition)
-            let point = CGPoint(
-                x: CGFloat(position.x),
-                y: CGFloat(position.y)
-            )
-            delegate?.die(die, didStopOn: value, at: point)
-        }
     }
     
     

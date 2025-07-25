@@ -9,11 +9,6 @@ class Die: NSObject {
         case released
         case rolling
         case resting
-        case done
-    }
-    
-    protocol Delegate {
-        func die(_ die: Die, didStopOn value: Int)
     }
     
     private static let facePositions: [SCNVector3] = [
@@ -28,18 +23,18 @@ class Die: NSObject {
     private static let velocityFactor: Float = 3000 // TODO: calculate based on frame rate
     
     var dieNode: SCNNode?
-    var delegate: Delegate?
     var state: State = .initializing
+
+    var touchLocation: CGPoint = .zero
+    var touchPreviousLocation: CGPoint = .zero
 
     private var faceNodes: [SCNNode]?
     private var surfaceNode: SCNNode?
     private var parentNode: SCNNode?
     
     private var overrideFaceValues: [Int]?
-    private var touchLocation: CGPoint = .zero
-    private var touchVelocity: CGVector = .zero
 
-    private var value: Int {
+    var value: Int {
         guard let faceNodes else { return 0 }
         
         let upwardFaceNode = faceNodes.sorted(by: {
@@ -90,11 +85,11 @@ class Die: NSObject {
         dieNode.physicsBody?.restitution = 0.9
     }
     
-    func updateHolding(location: CGPoint, velocity: CGVector, isHolding: Bool = true) {
+    func updateHolding(location: CGPoint, previousLocation: CGPoint, isHolding: Bool = true) {
         guard state == .holding else { return }
         
         touchLocation = location
-        touchVelocity = velocity
+        touchPreviousLocation = previousLocation
         
         if !isHolding {
             state = .released
@@ -112,8 +107,6 @@ class Die: NSObject {
         case .rolling:
             renderRolling()
         case .resting:
-            renderResting()
-        case .done:
             ()
         }
     }
@@ -163,14 +156,13 @@ class Die: NSObject {
         guard state == .released else { return }
         state = .rolling
 
-        
         guard let dieNode else { return }
         
         dieNode.physicsBody?.isAffectedByGravity = true
         
         // Apply the linear force of the touch velocity
-        let vx = Float(touchVelocity.dx) * Self.velocityFactor
-        let vy = Float(touchVelocity.dy) * Self.velocityFactor
+        let vx = Float(touchLocation.x - touchPreviousLocation.x) * Self.velocityFactor
+        let vy = Float(touchLocation.y - touchPreviousLocation.y) * Self.velocityFactor
         dieNode.physicsBody?.applyForce(.init(vx, 0, vy), asImpulse: false)
         
         // Apply a random spin
@@ -200,24 +192,17 @@ class Die: NSObject {
             dieNode.physicsBody?.isResting ?? false
         else { return }
         state = .resting
-
-        delegate?.die(self, didStopOn: value)
     }
 
-    func renderResting() {
-        guard
-            state == .resting,
-            let dieNode
-        else { return }
-        state = .done
-        
-        dieNode.removeAllParticleSystems()
-        dieNode.removeFromParentNode()
+    func derender() {
+        if let dieNode {
+            dieNode.removeAllParticleSystems()
+            dieNode.removeFromParentNode()
+        }
         
         self.dieNode = nil
         self.surfaceNode = nil
         self.parentNode = nil
-        self.delegate = nil
     }
     
     func renderWithinWalls(
