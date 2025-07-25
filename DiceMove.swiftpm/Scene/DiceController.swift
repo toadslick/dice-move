@@ -36,7 +36,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UserDefaults.standard.addObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey, context: nil)
+        UserDefaults.standard.addObserver(self, forKeyPath: Loot.backgrounds.currentItemStorageKey, context: nil)
                 
         sceneView = (self.view as! SCNView)
         sceneView.delegate = self
@@ -177,7 +177,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
                     1000, 1000, 1000, 3000, 1000, 1000,
                 ])
             } else {
-                die = Die(parentNode: rootNode, textureName: InventoryCategory.faces.currentItem)
+                die = Die(parentNode: rootNode, textureName: Loot.faces.currentItem)
             }
             die.delegate = self
             dice.insert(die)
@@ -256,7 +256,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     // MARK: update background when changed
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == InventoryCategory.backgrounds.storageKey {
+        if keyPath == Loot.backgrounds.currentItemStorageKey {
             setBackground()
         }
     }
@@ -265,7 +265,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
         DispatchQueue.global(qos: .background).async { [weak self] in
             guard let self else { return }
             
-            let image = UIImage(named: InventoryCategory.backgrounds.currentItem)
+            let image = UIImage(named: Loot.backgrounds.currentItem)
             backgroundNode.geometry?.firstMaterial?.diffuse.contents = image
             
             let animation = CABasicAnimation(keyPath: "opacity")
@@ -281,7 +281,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate, Die.Delegate {
     }
     
     deinit {
-        UserDefaults.standard.removeObserver(self, forKeyPath: InventoryCategory.backgrounds.storageKey)
+        UserDefaults.standard.removeObserver(self, forKeyPath: Loot.backgrounds.currentItemStorageKey)
     }
 }
 

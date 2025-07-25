@@ -42,7 +42,7 @@ class Die: NSObject {
     }
     
     private var currentSkin: UIImage {
-        .init(resource: .init(name: InventoryCategory.skins.currentItem, bundle: .main))
+        .init(resource: .init(name: Loot.skins.currentItem, bundle: .main))
     }
     
     init(
@@ -141,8 +141,8 @@ class Die: NSObject {
             
             if
                 (dieNode.particleSystems ?? []).isEmpty,
-                let particle = SCNParticleSystem(named: "\(InventoryCategory.trails.currentItem).scnp", inDirectory: nil),
-                let aura = SCNParticleSystem(named: "\(InventoryCategory.auras.currentItem).scnp", inDirectory: nil)
+                let particle = SCNParticleSystem(named: "\(Loot.trails.currentItem).scnp", inDirectory: nil),
+                let aura = SCNParticleSystem(named: "\(Loot.auras.currentItem).scnp", inDirectory: nil)
             {
                 dieNode.addParticleSystem(particle)
                 dieNode.addParticleSystem(aura)

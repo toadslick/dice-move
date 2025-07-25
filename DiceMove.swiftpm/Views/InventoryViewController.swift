@@ -30,15 +30,15 @@ class InventoryViewController:
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        InventoryCategory.all.count
+        Loot.all.count
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        InventoryCategory.all[section].title
+        Loot.all[section].title
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        InventoryCategory.all[section].items.count
+        Loot.all[section].items.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -68,8 +68,8 @@ class InventoryViewController:
         }
     }
     
-    private func itemForRow(at indexPath: IndexPath) -> (category: InventoryCategory, item: String) {
-        let category = InventoryCategory.all[indexPath.section]
+    private func itemForRow(at indexPath: IndexPath) -> (category: Loot, item: String) {
+        let category = Loot.all[indexPath.section]
         return (category: category, item: category.items[indexPath.row])
     }
     

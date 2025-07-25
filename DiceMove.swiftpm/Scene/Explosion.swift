@@ -26,7 +26,7 @@ class Explosion: NSObject {
             
             parentNode.addChildNode(node)
             node.position = position
-            node.addParticleSystem(.init(named: InventoryCategory.explosions.currentItem, inDirectory: nil)!)
+            node.addParticleSystem(.init(named: Loot.explosions.currentItem, inDirectory: nil)!)
             
             DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + Self.activeDuration) {
                 self.state = .idle
