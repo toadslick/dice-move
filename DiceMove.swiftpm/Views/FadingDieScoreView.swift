@@ -44,7 +44,7 @@ class FadingDieScoreView: UIView {
         
         label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 32, weight: .semibold)
+        label.font = .systemFont(ofSize: 28, weight: .semibold)
         label.textColor = .systemYellow
         label.textAlignment = .center
         label.numberOfLines = 1

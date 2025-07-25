@@ -1,8 +1,10 @@
 import UIKit
 
 class ContentViewController: UIViewController, DiceController.Delegate {
+    
+    var titleLabel: UILabel!
+    
     override func viewDidLoad() {
-        
         view.backgroundColor = .black
         
         let diceController = DiceController()
@@ -12,7 +14,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         diceController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(diceController.view)
 
-        let titleLabel = UILabel(frame: .zero)
+        titleLabel = UILabel(frame: .zero)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Dice Move"
         titleLabel.textColor = .white
@@ -50,6 +52,10 @@ class ContentViewController: UIViewController, DiceController.Delegate {
             diceController.view.leftAnchor.constraint(equalTo: view.leftAnchor),
             diceController.view.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
+    }
+    
+    override func viewDidLayoutSubviews() {
+        titleLabel.isHidden = view.frame.width < 700
     }
     
     // MARK: dice delegate
