@@ -25,16 +25,22 @@ struct MoneyView: View {
             .background(.ultraThinMaterial)
             .cornerRadius(10)
             
-            HStack(alignment: .center, spacing: 5) {
+            HStack(alignment: .center, spacing: 1) {
                 ForEach(0..<game.ammoUsed, id: \.self) { _ in
                     Image(systemName: "square.fill").frame(width: 30, height: 30)
                         .foregroundStyle(.yellow)
                 }
                 ForEach(game.ammoUsed..<game.ammo, id: \.self) { _ in
                     Image(systemName: "square").frame(width: 30, height: 30)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(.white)
+                        .opacity(0.75)
                 }
-            }.tint(.yellow)
+            }
+            .padding(.horizontal, 5)
+            .padding(.vertical, 5)
+            .background(.ultraThinMaterial)
+            .cornerRadius(10)
+
         }
         .padding(30)
         .allowsHitTesting(false)
