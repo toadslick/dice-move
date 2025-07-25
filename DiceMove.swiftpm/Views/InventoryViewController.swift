@@ -57,8 +57,9 @@ class InventoryViewController:
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let (category, item) = itemForRow(at: indexPath)
         category.currentItem = item
-
-        category.items.indices.forEach { index in
+        
+        let keys = Array(category.items.keys)
+        keys.indices.forEach { index in
             let indexPath = IndexPath(row: index, section: indexPath.section)
             let isSelected = isSelected(at: indexPath)
             if let cell = tableView.cellForRow(at: indexPath) {
@@ -70,7 +71,8 @@ class InventoryViewController:
     
     private func itemForRow(at indexPath: IndexPath) -> (category: Loot, item: String) {
         let category = Loot.all[indexPath.section]
-        return (category: category, item: category.items[indexPath.row])
+        let keys = Array(category.items.keys)
+        return (category: category, item: keys[indexPath.row])
     }
     
     private func isSelected(at indexPath: IndexPath) -> Bool {
