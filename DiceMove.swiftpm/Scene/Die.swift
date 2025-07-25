@@ -20,17 +20,16 @@ class Die: NSObject {
         .init( 0,  0, -1),
     ]
     
-    var dieNode: SCNNode?
-    var state: State = .initializing
+    public private(set) var touchLocation: CGPoint
+    public private(set) var touchPreviousLocation: CGPoint
+    public private(set) var state: State = .initializing
+    private var overrideFaceValues: [Int]?
 
-    var touchLocation: CGPoint
-    var touchPreviousLocation: CGPoint
-
+    public private(set) var dieNode: SCNNode?
     private var faceNodes: [SCNNode]?
     private var surfaceNode: SCNNode?
     private var parentNode: SCNNode?
     
-    private var overrideFaceValues: [Int]?
 
     var value: Int {
         guard let faceNodes else { return 0 }

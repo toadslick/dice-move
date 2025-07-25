@@ -12,7 +12,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
     
     protocol Delegate {
         func die(_ die: Die, didStopOn value: Int, at point: CGPoint)
-        func dice(countDidChangeTo count: Int)
     }
     
     private var sceneFrame: CGRect!
@@ -27,12 +26,17 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
     private var ceilingNode: SCNNode!
     private var backgroundNode: SCNNode!
     
-    private var dice: Set<Die> = []
     private var explosions: Set<Explosion> = []
     private var heldDice: [UITouch: Die] = [:]
     private var state: State = .initializing
     
     var delegate: Delegate?
+    
+    private var dice: Set<Die> = [] {
+        didSet {
+            Game.shared.ammoUsed = dice.count
+        }
+    }
     
     override func loadView() {
         view = SCNView(frame: .zero)
@@ -199,13 +203,13 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         
         die.derender()
         dice.remove(die)
-        delegate?.dice(countDidChangeTo: dice.count)
     }
     
     // MARK: touch handling
         
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard
+            state == .running,
             let rootNode = sceneView.scene?.rootNode,
             dice.count < Game.shared.ammo
         else { return }
@@ -223,7 +227,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
             }
             dice.insert(die)
             heldDice[touch] = die
-            delegate?.dice(countDidChangeTo: dice.count)
         }
     }
     

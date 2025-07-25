@@ -1,6 +1,6 @@
 import Foundation
 
-class Game: NSObject {
+class Game: NSObject, ObservableObject {
     
     enum StorageKey: String, RawRepresentable {
         case money
@@ -24,6 +24,7 @@ class Game: NSObject {
         set {
             previousMoney = money
             UserDefaults.standard.set(newValue, forKey: StorageKey.money.rawValue)
+            publishChange()
         }
     }
     
@@ -32,12 +33,19 @@ class Game: NSObject {
     static let minimumAmmo = 1
     static let maximumAmmo = 25
     
+    var ammoUsed = 0 {
+        didSet {
+            publishChange()
+        }
+    }
+    
     public private(set) var ammo: Int {
         get {
             max(UserDefaults.standard.integer(forKey: StorageKey.ammo.rawValue), 1)
         }
         set {
             UserDefaults.standard.set(newValue, forKey: StorageKey.ammo.rawValue)
+            publishChange()
         }
     }
     
@@ -50,5 +58,12 @@ class Game: NSObject {
         guard money > nextAmmoPrice else { return }
         money -= nextAmmoPrice
         ammo += 1
+    }
+    
+    private func publishChange() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            objectWillChange.send()
+        }
     }
 }

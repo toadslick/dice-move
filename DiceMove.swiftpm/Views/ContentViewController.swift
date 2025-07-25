@@ -59,12 +59,6 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         titleLabel.isHidden = view.frame.width < 700
     }
     
-    // MARK: dice delegate
-    
-    func dice(countDidChangeTo count: Int) {
-        
-    }
-    
     func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
         Game.shared.money += value
 
