@@ -20,13 +20,11 @@ class Die: NSObject {
         .init( 0,  0, -1),
     ]
     
-    private static let velocityFactor: Float = 3000 // TODO: calculate based on frame rate
-    
     var dieNode: SCNNode?
     var state: State = .initializing
 
-    var touchLocation: CGPoint = .zero
-    var touchPreviousLocation: CGPoint = .zero
+    var touchLocation: CGPoint
+    var touchPreviousLocation: CGPoint
 
     private var faceNodes: [SCNNode]?
     private var surfaceNode: SCNNode?
@@ -54,12 +52,15 @@ class Die: NSObject {
     }
     
     init(
-        parentNode: SCNNode,
+        at location: CGPoint,
+        in parentNode: SCNNode,
         textureName: String,
         overrideFaceValues: [Int]? = nil
     ) {
         self.overrideFaceValues = overrideFaceValues
         self.parentNode = parentNode
+        self.touchLocation = location
+        self.touchPreviousLocation = location
         
         super.init()
         
@@ -116,10 +117,11 @@ class Die: NSObject {
             let dieNode,
             let parentNode
         else { return }
-        
+        state = .holding
+
         dieNode.simdScale = .init(2, 2, 2)
         dieNode.simdEulerAngles = .random(in: 0...(.pi))
-        dieNode.position = .init(x: 0, y: 0, z: 0)
+        dieNode.position = position
         
         parentNode.addChildNode(dieNode)
         
@@ -138,9 +140,6 @@ class Die: NSObject {
         
         faceNodes.forEach(dieNode.addChildNode)
         surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
-        
-        state = .holding
-        renderHolding(at: position)
     }
     
     private func renderHolding(at position: SCNVector3) {
@@ -161,8 +160,9 @@ class Die: NSObject {
         dieNode.physicsBody?.isAffectedByGravity = true
         
         // Apply the linear force of the touch velocity
-        let vx = Float(touchLocation.x - touchPreviousLocation.x) * Self.velocityFactor
-        let vy = Float(touchLocation.y - touchPreviousLocation.y) * Self.velocityFactor
+        let factor: Float = 30 // TODO: how to calculate this
+        let vx = Float(touchLocation.x - touchPreviousLocation.x) * factor
+        let vy = Float(touchLocation.y - touchPreviousLocation.y) * factor
         dieNode.physicsBody?.applyForce(.init(vx, 0, vy), asImpulse: false)
         
         // Apply a random spin

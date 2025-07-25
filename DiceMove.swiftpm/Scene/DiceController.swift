@@ -50,6 +50,23 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         sceneView.autoenablesDefaultLighting = true
         sceneView.backgroundColor = UIColor.black
         sceneView.contentMode = .center
+        sceneView.rendersContinuously = true
+        
+        let scene = SCNScene()
+        scene.physicsWorld.speed = 1.5
+        sceneView.scene = scene
+        
+        cameraNode = SCNNode()
+        cameraNode.name = "camera"
+        cameraNode.camera = SCNCamera()
+        cameraNode.camera!.focalLength = 30
+        cameraNode.camera!.fieldOfView = 30
+        cameraNode.position = SCNVector3(x: 0, y: 0, z: 12)
+        cameraNode.simdRotate(
+            by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(1, 0, 0))),
+            aroundTarget: simd_float3(x: 0, y: 0, z: 0)
+        )
+        scene.rootNode.addChildNode(cameraNode)
     }
     
     override func viewDidLayoutSubviews() {
@@ -60,11 +77,10 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         .all
     }
     
+    // MARK: rendering
+    
     func renderer(_ renderer: any SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        
-        if state == .initializing {
-            renderInitial()
-        }
+        renderInitial()
         renderWalls()
         renderBackground()
         
@@ -96,23 +112,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
     private func renderInitial() {
         guard state == .initializing else { return }
         state = .running
-        
-        let scene = SCNScene()
-        scene.physicsWorld.speed = 1.5
-        sceneView.scene = scene
-        
-        cameraNode = SCNNode()
-        cameraNode.name = "camera"
-        cameraNode.camera = SCNCamera()
-        cameraNode.camera!.focalLength = 30
-        cameraNode.camera!.fieldOfView = 30
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 12)
-        cameraNode.simdRotate(
-            by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(1, 0, 0))),
-            aroundTarget: simd_float3(x: 0, y: 0, z: 0)
-        )
-        scene.rootNode.addChildNode(cameraNode)
-        
+                
         floorNode = createWallNode()
         floorNode.simdRotate(
             by: simd_quatf(angle: -.pi / 2, axis: simd_normalize(simd_float3(1, 0, 0))),
@@ -202,28 +202,28 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         die.derender()
         dice.remove(die)
     }
+    
+    // MARK: touch handling
         
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard
             let rootNode = sceneView.scene?.rootNode,
             dice.count < Self.maxDice
         else { return }
-        
+
         for touch in touches {
             let die: Die
             let percent = Float.random(in: 0...1)
+            let location = touch.location(in: sceneView)
             if percent > 0.98 {
-                die = Die(parentNode: rootNode, textureName: "Explosion", overrideFaceValues: [
+                die = Die(at: location, in: rootNode, textureName: "Explosion", overrideFaceValues: [
                     1000, 1000, 1000, 3000, 1000, 1000,
                 ])
             } else {
-                die = Die(parentNode: rootNode, textureName: Loot.faces.currentItem)
+                die = Die(at: location, in: rootNode, textureName: Loot.faces.currentItem)
             }
             dice.insert(die)
             heldDice[touch] = die
-            
-            let location = touch.location(in: sceneView)
-            die.updateHolding(location: location, previousLocation: location)
         }
     }
     
@@ -254,6 +254,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         touchesEnded(touches, with: event)
     }
     
+    // MARK: helper methods
     
     private func viewPointToScene(_ viewPoint: CGPoint, additionalDepth: Float = 0) -> SCNVector3 {
         let scenePoint = sceneView.unprojectPoint(.init(x: Float(viewPoint.x), y: Float(viewPoint.y), z: 0))
