@@ -38,7 +38,7 @@ class InventoryViewController:
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        Loot.all[section].items.count
+        Loot.all[section].ownedItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -70,10 +70,9 @@ class InventoryViewController:
     
     private func itemForRow(at indexPath: IndexPath) -> (category: Loot, item: String, rarity: Rarity) {
         let category = Loot.all[indexPath.section]
-        let keys = Array(category.items.keys)
-        let item = keys[indexPath.row]
+        let item = category.ownedItems[indexPath.row]
         let rarity = category.items[item] ?? .basic
-        return (category: category, item: keys[indexPath.row], rarity: rarity)
+        return (category: category, item: item, rarity: rarity)
     }
     
     private func isSelected(at indexPath: IndexPath) -> Bool {

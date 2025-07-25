@@ -3,6 +3,7 @@ import UIKit
 class ContentViewController: UIViewController, DiceController.Delegate {
     
     var titleLabel: UILabel!
+    var game = Game.shared
     
     override func viewDidLoad() {
         view.backgroundColor = .black

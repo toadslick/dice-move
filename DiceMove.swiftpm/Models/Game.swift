@@ -4,13 +4,16 @@ class Game: NSObject {
     
     enum StorageKey: String, RawRepresentable {
         case money
-    }
-    
-    protocol MoneyDelegate {
-        func moneyDidChange(from previousAmount: Int, to newAmount: Int)
+        case ammo
     }
     
     static let shared = Game()
+    
+    private override init() {
+        super.init()
+    }
+    
+    // MARK: money
     
     var previousMoney: Int = 0
     
@@ -24,25 +27,28 @@ class Game: NSObject {
         }
     }
     
-    var moneyDelegate: MoneyDelegate?
+    // MARK: ammo
     
-    private override init() {
-        super.init()
-        
-        UserDefaults.standard.addObserver(self, forKeyPath: StorageKey.money.rawValue, context: nil)
-    }
+    static let minimumAmmo = 1
+    static let maximumAmmo = 25
     
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        switch keyPath {
-        case StorageKey.money.rawValue:
-            moneyDelegate?.moneyDidChange(from: previousMoney, to: money)
-        default:
-            ()
+    public private(set) var ammo: Int {
+        get {
+            max(UserDefaults.standard.integer(forKey: StorageKey.ammo.rawValue), 1)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: StorageKey.ammo.rawValue)
         }
     }
     
-    deinit {
-        UserDefaults.standard.removeObserver(self, forKeyPath: StorageKey.money.rawValue)
+    var nextAmmoPrice: Int {
+        let n = ammo
+        return n * n * n * 25
     }
     
+    func purchaseAmmo() {
+        guard money > nextAmmoPrice else { return }
+        money -= nextAmmoPrice
+        ammo += 1
+    }
 }
