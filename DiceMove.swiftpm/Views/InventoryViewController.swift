@@ -14,7 +14,7 @@ class InventoryViewController:
         tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "item")
+        tableView.register(InventoryCell.self, forCellReuseIdentifier: "item")
         tableView.allowsSelection = true
         tableView.allowsMultipleSelection = true
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -42,12 +42,11 @@ class InventoryViewController:
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "item")!
-        let (_, item) = itemForRow(at: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "item") as! InventoryCell
+        let (_, item, rarity) = itemForRow(at: indexPath)
         let isSelected = isSelected(at: indexPath)
         
-        cell.textLabel?.text = item
-        cell.selectionStyle = .default
+        cell.setup(item: item, rarity: rarity)
         cell.accessoryType = isSelected ? .checkmark : .none
         cell.backgroundColor = .black.withAlphaComponent(0.2)
         
@@ -55,7 +54,7 @@ class InventoryViewController:
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let (category, item) = itemForRow(at: indexPath)
+        let (category, item, _) = itemForRow(at: indexPath)
         category.currentItem = item
         
         let keys = Array(category.items.keys)
@@ -69,14 +68,16 @@ class InventoryViewController:
         }
     }
     
-    private func itemForRow(at indexPath: IndexPath) -> (category: Loot, item: String) {
+    private func itemForRow(at indexPath: IndexPath) -> (category: Loot, item: String, rarity: Rarity) {
         let category = Loot.all[indexPath.section]
         let keys = Array(category.items.keys)
-        return (category: category, item: keys[indexPath.row])
+        let item = keys[indexPath.row]
+        let rarity = category.items[item] ?? .basic
+        return (category: category, item: keys[indexPath.row], rarity: rarity)
     }
     
     private func isSelected(at indexPath: IndexPath) -> Bool {
-        let (category, item) = itemForRow(at: indexPath)
+        let (category, item, _) = itemForRow(at: indexPath)
         return category.currentItem == item
     }
 }
