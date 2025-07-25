@@ -5,10 +5,11 @@ class FadingDieScoreView: UIView {
     var label: UILabel!
     
     static func create(score: Int, at origin: CGPoint, in superview: UIView) {
-        let size = 100.0
+        let size = 300.0
         
         let view = FadingDieScoreView(frame: .zero)
         view.label.text = score.formatted(.number)
+        
         view.frame = .init(
             x: origin.x - (size / 2),
             y: origin.y - (size / 2),
@@ -43,7 +44,7 @@ class FadingDieScoreView: UIView {
         
         label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 26, weight: .semibold)
+        label.font = .systemFont(ofSize: 32, weight: .semibold)
         label.textColor = .systemYellow
         label.textAlignment = .center
         label.numberOfLines = 1
