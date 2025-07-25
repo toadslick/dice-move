@@ -21,6 +21,7 @@ class Loot {
             "Metal": .uncommon,
             "Wood": .uncommon,
             "Gold": .rare,
+            "Acid": .rare,
             "Nebula": .epic,
             "Spark": .legendary,
         ]
@@ -86,10 +87,6 @@ class Loot {
     ]
     
     typealias AnyLootItem = (loot: Loot, item: String)
-    
-    static var allItemsShuffled: [AnyLootItem] {
-        
-    }
     
     
     
