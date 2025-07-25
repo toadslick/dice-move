@@ -12,10 +12,8 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
     
     protocol Delegate {
         func die(_ die: Die, didStopOn value: Int, at point: CGPoint)
-        func dice(didChange dice: Set<Die>, maxDice: Int)
+        func dice(countDidChangeTo count: Int)
     }
-    
-    private static let maxDice = 17
     
     private var sceneFrame: CGRect!
     private var sceneView: SCNView!
@@ -201,6 +199,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         
         die.derender()
         dice.remove(die)
+        delegate?.dice(countDidChangeTo: dice.count)
     }
     
     // MARK: touch handling
@@ -208,7 +207,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard
             let rootNode = sceneView.scene?.rootNode,
-            dice.count < Self.maxDice
+            dice.count < Game.shared.ammo
         else { return }
 
         for touch in touches {
@@ -224,6 +223,7 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
             }
             dice.insert(die)
             heldDice[touch] = die
+            delegate?.dice(countDidChangeTo: dice.count)
         }
     }
     

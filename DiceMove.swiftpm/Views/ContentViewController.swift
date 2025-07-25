@@ -61,7 +61,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
     
     // MARK: dice delegate
     
-    func dice(didChange dice: Set<Die>, maxDice: Int) {
+    func dice(countDidChangeTo count: Int) {
         
     }
     
