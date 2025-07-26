@@ -25,19 +25,19 @@ struct MoneyView: View {
             .background(.ultraThinMaterial)
             .cornerRadius(10)
             
-            HStack(alignment: .center, spacing: 1) {
+            HStack(alignment: .center, spacing: 3) {
                 ForEach(0..<game.ammoUsed, id: \.self) { _ in
-                    Image(systemName: "square.fill").frame(width: 30, height: 30)
+                    Image(systemName: "die.face.3.fill").imageScale(.large)
                         .foregroundStyle(.yellow)
                 }
                 ForEach(game.ammoUsed..<game.ammo, id: \.self) { _ in
-                    Image(systemName: "square").frame(width: 30, height: 30)
+                    Image(systemName: "die.face.3").imageScale(.large)
                         .foregroundStyle(.white)
                         .opacity(0.75)
                 }
             }
-            .padding(.horizontal, 5)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
             .background(.ultraThinMaterial)
             .cornerRadius(10)
 
