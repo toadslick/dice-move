@@ -86,6 +86,17 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
         renderWalls()
         renderBackground()
         
+        heldDice.forEach { (touch, die) in
+            die.updateHolding(
+                location: touch.location(in: sceneView),
+                previousLocation: touch.previousLocation(in: sceneView),
+                isHolding: !(touch.phase == .ended || touch.phase == .cancelled)
+            )
+            if die.state == .released {
+                heldDice.removeValue(forKey: touch)
+            }
+        }
+        
         dice.forEach { die in
             die.render(at: viewPointToScene(die.touchLocation))
             
@@ -228,33 +239,6 @@ class DiceController: UIViewController, SCNSceneRendererDelegate {
             dice.insert(die)
             heldDice[touch] = die
         }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            guard let die = heldDice[touch] else { continue }
-            die.updateHolding(
-                location: touch.location(in: sceneView),
-                previousLocation: touch.previousLocation(in: sceneView)
-            )
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            guard let die = heldDice[touch] else { continue }
-            die.updateHolding(
-                location: touch.location(in: sceneView),
-                previousLocation: touch.previousLocation(in: sceneView),
-                isHolding: false
-            )
-            heldDice.removeValue(forKey: touch)
-        }
-    }
-    
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        touchesEnded(touches, with: event)
     }
     
     // MARK: helper methods

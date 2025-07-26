@@ -85,11 +85,11 @@ class Die: NSObject {
         dieNode.physicsBody?.restitution = 0.9
     }
     
-    func updateHolding(location: CGPoint, previousLocation: CGPoint, isHolding: Bool = true) {
+    func updateHolding(location: CGPoint, previousLocation: CGPoint, isHolding: Bool) {
         touchLocation = location
         touchPreviousLocation = previousLocation
         
-        if !isHolding {
+        if state == .holding && !isHolding {
             state = .released
         }
     }
@@ -114,7 +114,6 @@ class Die: NSObject {
             let dieNode,
             let parentNode
         else { return }
-        state = .holding
 
         dieNode.simdScale = .init(2, 2, 2)
         dieNode.simdEulerAngles = .random(in: 0...(.pi))
@@ -137,6 +136,8 @@ class Die: NSObject {
         
         faceNodes.forEach(dieNode.addChildNode)
         surfaceNode.geometry?.firstMaterial?.diffuse.contents = currentSkin
+        
+        state = .holding
     }
     
     private func renderHolding(at position: SCNVector3) {
