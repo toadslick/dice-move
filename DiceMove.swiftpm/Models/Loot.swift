@@ -86,9 +86,24 @@ class Loot {
         backgrounds,
     ]
     
-    typealias AnyLootItem = (loot: Loot, item: String)
+    typealias Item = (loot: Loot, item: String)
     
-    
+    static func randomItem(ofRarity targetRarity: Rarity) -> Item {
+        let allItemsByLoot: [[Item]] = all.map({ loot in
+            loot.items
+                .filter({ (item, rarity) in
+                    rarity == targetRarity
+                })
+                .map({ (item, _) in
+                    (loot: loot, item: item)
+                })
+        })
+        let allItems: [Item] = allItemsByLoot.flatMap({ $0 })
+        guard let item = allItems.randomElement() else {
+            fatalError("No item found of rarity: \(targetRarity.rawValue)")
+        }
+        return item
+    }
     
     init(
         title: String,

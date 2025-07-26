@@ -32,7 +32,7 @@ class ShopViewController: UIViewController {
     }
 
     private func gameDidChange() {
-        let ammoPrice = Game.shared.nextAmmoPrice.formatted(.number)
+        let ammoPrice = Game.shared.ammoPrice.formatted(.number)
         ammoButton.setTitle("Add a die: \(ammoPrice)", for: .normal)
     }
     

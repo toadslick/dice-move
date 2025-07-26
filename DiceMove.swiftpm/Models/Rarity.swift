@@ -18,8 +18,8 @@ enum Rarity: String, RawRepresentable {
         .common,
     ]
     
-    static func random() -> Rarity {
-        let n = Float.random(in: 0..<1)
+    static func random(luckMultiplier: Int = 1) -> Rarity {
+        let n = Float.random(in: 0..<1) * Float(luckMultiplier)
         for rarity in testOrder {
             if n <= rarity.frequency {
                 return rarity

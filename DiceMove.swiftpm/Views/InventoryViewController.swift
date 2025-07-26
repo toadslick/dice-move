@@ -8,11 +8,7 @@ class InventoryViewController:
     var tableView: UITableView!
     
     override func viewDidLoad() {
-        popoverPresentationController?.adaptiveSheetPresentationController.prefersGrabberVisible = true
-        popoverPresentationController?.adaptiveSheetPresentationController
-        
-        view.backgroundColor = .clear
-        
+        sheetPresentationController?.prefersGrabberVisible = true
         
         tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.dataSource = self
