@@ -86,8 +86,6 @@ class Die: NSObject {
     }
     
     func updateHolding(location: CGPoint, previousLocation: CGPoint, isHolding: Bool = true) {
-        guard state == .holding else { return }
-        
         touchLocation = location
         touchPreviousLocation = previousLocation
         
