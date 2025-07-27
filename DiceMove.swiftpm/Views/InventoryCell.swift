@@ -1,6 +1,7 @@
 import UIKit
 
 class InventoryCell: UITableViewCell {
+    static let reuseID = "InventoryItem"
     
     var itemLabel: UILabel!
     var rarityLabel: UILabel!

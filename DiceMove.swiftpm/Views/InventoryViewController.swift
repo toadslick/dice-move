@@ -13,7 +13,7 @@ class InventoryViewController:
         tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(InventoryCell.self, forCellReuseIdentifier: "item")
+        tableView.register(InventoryCell.self, forCellReuseIdentifier: InventoryCell.reuseID)
         tableView.allowsSelection = true
         tableView.allowsMultipleSelection = true
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -41,7 +41,7 @@ class InventoryViewController:
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "item") as! InventoryCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: InventoryCell.reuseID) as! InventoryCell
         let (_, item, rarity) = itemForRow(at: indexPath)
         let isSelected = isSelected(at: indexPath)
         

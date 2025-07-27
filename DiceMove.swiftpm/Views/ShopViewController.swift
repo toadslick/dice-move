@@ -1,23 +1,50 @@
 import UIKit
 import Combine
 
-class ShopViewController: UIViewController {
-
+class ShopViewController:
+    UIViewController,
+    UITableViewDataSource,
+    UITableViewDelegate
+{
     var gameSubscriber: AnyCancellable!
-    var ammoButton: UIButton!
+    
+    var tableView: UITableView!
     
     override func viewDidLoad() {
-        ammoButton = UIButton(configuration: .filled())
-        ammoButton.translatesAutoresizingMaskIntoConstraints = false
-        ammoButton.addTarget(self, action: #selector(purchaseAmmoAction), for: .touchUpInside)
-        view.addSubview(ammoButton)
+        tableView = UITableView(frame: .zero)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            ammoButton.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 1),
-            ammoButton.leftAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leftAnchor, multiplier: 1),
-            
-            view.safeAreaLayoutGuide.rightAnchor.constraint(equalToSystemSpacingAfter: ammoButton.rightAnchor, multiplier: 1),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            tableView.rightAnchor.constraint(equalTo: view.rightAnchor),
         ])
+        
+        tableView.reloadData()
+    }
+    
+    // MARK: table view
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        ShopItem.all.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: ShopCell.reuseID) as! ShopCell
+        cell.setup(item: ShopItem.all[indexPath.row])
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let item = ShopItem.all[indexPath.row]
+        if item.isEnabled {
+            item.purchaseHandler()
+        }
     }
     
     // MARK: game subscription
@@ -32,8 +59,7 @@ class ShopViewController: UIViewController {
     }
 
     private func gameDidChange() {
-        let ammoPrice = Game.shared.ammoPrice.formatted(.number)
-        ammoButton.setTitle("Add a die: \(ammoPrice)", for: .normal)
+        tableView.reloadData()
     }
     
     // MARK: button actions
