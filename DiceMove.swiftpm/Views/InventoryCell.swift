@@ -17,6 +17,8 @@ class InventoryCell: UITableViewCell {
     }
     
     private func sharedInit() {
+        backgroundColor = .black.withAlphaComponent(0.2)
+
         itemLabel = UILabel(frame: .zero)
         itemLabel.translatesAutoresizingMaskIntoConstraints = false
         itemLabel.font = .preferredFont(forTextStyle: .body)

@@ -85,10 +85,12 @@ class Game: NSObject, ObservableObject {
         spins > 1
     }
     
-    func spin() -> Loot.Item {
+    func performSpin() -> Loot.Item {
         spins -= 1
         let rarity = Rarity.random(luckMultiplier: useLuck())
-        return Loot.randomItem(ofRarity: rarity)
+        let result = Loot.randomItem(ofRarity: rarity)
+        result.loot.addToOwnedItems(item: result.item)
+        return result
     }
     
     public private(set) var spins: Int {

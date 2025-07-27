@@ -83,7 +83,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
     @objc private func shopAction(sender: UIButton) {
         let controller = ShopViewController()
         controller.traitOverrides.userInterfaceStyle = .dark
-        controller.modalPresentationStyle = .pageSheet
+        controller.modalPresentationStyle = .popover
         controller.popoverPresentationController?.sourceItem = sender
         present(controller, animated: true)
     }

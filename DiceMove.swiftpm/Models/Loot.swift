@@ -153,9 +153,11 @@ class Loot {
         }
     }
     
-    private func own(item: String) {
-        var items = Array(ownedItems)
-        items.append(item)
-        ownedItems = items
+    func addToOwnedItems(item: String) {
+        if ownedItems.contains(item) { return }
+        
+        var newItems = Array(ownedItems)
+        newItems.append(item)
+        ownedItems = newItems
     }
 }

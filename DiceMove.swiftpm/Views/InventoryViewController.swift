@@ -14,8 +14,6 @@ class InventoryViewController:
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(InventoryCell.self, forCellReuseIdentifier: InventoryCell.reuseID)
-        tableView.allowsSelection = true
-        tableView.allowsMultipleSelection = true
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
         view.addSubview(tableView)
@@ -46,9 +44,7 @@ class InventoryViewController:
         let isSelected = isSelected(at: indexPath)
         
         cell.setup(item: item, rarity: rarity)
-        cell.accessoryType = isSelected ? .checkmark : .none
-        cell.backgroundColor = .black.withAlphaComponent(0.2)
-        
+        cell.accessoryType = isSelected ? .checkmark : .none        
         return cell
     }
     

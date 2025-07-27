@@ -11,10 +11,12 @@ class ShopViewController:
     var tableView: UITableView!
     
     override func viewDidLoad() {
-        tableView = UITableView(frame: .zero)
+        tableView = UITableView(frame: .zero, style: .insetGrouped)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(ShopCell.self, forCellReuseIdentifier: ShopCell.reuseID)
+        tableView.backgroundColor = .clear
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([

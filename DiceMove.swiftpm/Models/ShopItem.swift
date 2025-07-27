@@ -10,16 +10,16 @@ struct ShopItem {
     
     static var all: [ShopItem] {[
         .init(
-            title: "Roll one more die at the same time.",
+            title: "Add a die to your ammo.",
             price: Game.shared.ammoPrice,
-            icon: "🎲+1",
+            icon: "🎲 + 1",
             isEnabled: Game.shared.canPurchaseAmmo,
             purchaseHandler: Game.shared.purchaseAmmo
         ),
         .init(
-            title: "Gain a spin on the wheel of prizes.",
+            title: "Spin the prize wheel!",
             price: Game.shared.spinPrice,
-            icon: "🎁+1",
+            icon: "🎁 + 1",
             isEnabled: Game.shared.canPurchaseSpin,
             purchaseHandler: Game.shared.purchaseSpin
         ),
@@ -31,7 +31,7 @@ struct ShopItem {
         .init(
             title: "\(multiplier)× luck for \(Game.shared.spinsPerLuckPurchase) spins.",
             price: Game.shared.luckPrice(multiplier: multiplier),
-            icon: "☘️×\(multiplier)",
+            icon: "☘️ × \(multiplier)",
             isEnabled: Game.shared.canPurchaseLuck(multiplier: multiplier),
             purchaseHandler: {
                 Game.shared.purchaseLuck(multiplier: multiplier)
