@@ -16,6 +16,14 @@ class Game: NSObject, ObservableObject {
         super.init()
     }
     
+    // MARK: delegate
+    
+    protocol Delegate {
+        func game(_ game: Game, didAddItemToInventory item: String, fromLoot loot: Loot, ofRarity rarity: Rarity)
+    }
+
+    var delegate: Delegate?
+    
     // MARK: money
     
     var previousMoney: Int = 0
@@ -85,12 +93,12 @@ class Game: NSObject, ObservableObject {
         spins > 0
     }
     
-    func performSpin() -> Loot.Item {
+    func performSpin() {
         spins -= 1
         let rarity = Rarity.random(luckMultiplier: useLuck())
         let result = Loot.randomItem(ofRarity: rarity)
         result.loot.addToOwnedItems(item: result.item)
-        return result
+        delegate?.game(self, didAddItemToInventory: result.item, fromLoot: result.loot, ofRarity: rarity)
     }
     
     public private(set) var spins: Int {

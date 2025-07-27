@@ -1,8 +1,11 @@
 import UIKit
 import Combine
 
-class ContentViewController: GameSubscribingViewController, DiceController.Delegate {
-    
+class ContentViewController:
+    GameSubscribingViewController,
+    DiceController.Delegate,
+    Game.Delegate
+{
     var titleLabel: UILabel!
     var luckLabel: UILabel!
     var inventoryButton: VibrancyButton!
@@ -12,6 +15,8 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
     var game = Game.shared
     
     override func viewDidLoad() {
+        game.delegate = self
+        
         view.backgroundColor = .black
         
         let diceController = DiceController()
@@ -86,6 +91,8 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
         titleLabel.isHidden = view.frame.width < 700
     }
     
+    // MARK: game pub/sub
+    
     override func gameDidChange() {
         spinButton.title = "Spin: \(game.spins)"
         spinButton.isEnabled = game.canPerformSpin
@@ -97,6 +104,46 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
             luckLabel.isHidden = true
         }
     }
+    
+    // MARK: game delegate
+    
+    func game(_ game: Game, didAddItemToInventory item: String, fromLoot loot: Loot, ofRarity rarity: Rarity) {
+        let itemNotificationView = ItemNotificationView(frame: .zero)
+        itemNotificationView.translatesAutoresizingMaskIntoConstraints = false
+        itemNotificationView.setup(itemName: item, lootName: loot.title, rarity: rarity)
+        view.addSubview(itemNotificationView)
+        
+        NSLayoutConstraint.activate([
+            itemNotificationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            itemNotificationView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        ])
+        
+        let translateX = 400.0
+        let scale = 0.5
+        let animationDuration = 0.5
+        let pauseDuration = 3.0
+        
+        itemNotificationView.alpha = 0
+        itemNotificationView.transform = .identity
+            .translatedBy(x: -translateX, y: 0)
+            .scaledBy(x: scale, y: scale)
+        UIView.animate(.smooth(duration: animationDuration, extraBounce: 0.2)) { [unowned itemNotificationView] in
+            itemNotificationView.alpha = 1
+            itemNotificationView.transform = .identity
+        } completion: {
+            UIView.animate(withDuration: animationDuration, delay: pauseDuration) { [unowned itemNotificationView] in
+                itemNotificationView.alpha = 0
+                itemNotificationView.transform = .identity
+                    .translatedBy(x: translateX, y: 0)
+                    .scaledBy(x: scale, y: scale)
+            } completion: { [unowned itemNotificationView] _ in
+                itemNotificationView.removeFromSuperview()
+            }
+        }
+        
+    }
+    
+    // MARK: die delegate
     
     func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
         game.money += value
@@ -110,6 +157,8 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
             FadingDieScoreView.create(score: value, at: point, in: self.view)
         }
     }
+    
+    // MARK: button actions
     
     @objc private func inventoryAction(sender: UIButton) {
         let controller = InventoryViewController()
