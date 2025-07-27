@@ -82,7 +82,7 @@ class Game: NSObject, ObservableObject {
     }
     
     var canPerformSpin: Bool {
-        spins > 1
+        spins > 0
     }
     
     func performSpin() -> Loot.Item {

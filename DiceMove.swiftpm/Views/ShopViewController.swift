@@ -2,12 +2,10 @@ import UIKit
 import Combine
 
 class ShopViewController:
-    UIViewController,
+    GameSubscribingViewController,
     UITableViewDataSource,
     UITableViewDelegate
 {
-    var gameSubscriber: AnyCancellable!
-    
     var tableView: UITableView!
     
     override func viewDidLoad() {
@@ -49,18 +47,7 @@ class ShopViewController:
         }
     }
     
-    // MARK: game subscription
-    
-    override func viewWillAppear(_ animated: Bool) {
-        gameSubscriber = Game.shared.objectWillChange.sink(receiveValue: gameDidChange)
-        gameDidChange()
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        gameSubscriber.cancel()
-    }
-
-    private func gameDidChange() {
+    override func gameDidChange() {
         tableView.reloadData()
     }
     

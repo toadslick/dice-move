@@ -14,6 +14,24 @@ class VibrancyButton: UIView {
     
     var button: UIButton!
     
+    var title: String {
+        get {
+            button.title(for: .normal) ?? ""
+        }
+        set {
+            button.setTitle(newValue, for: .normal)
+        }
+    }
+    
+    var isEnabled: Bool {
+        get {
+            button.isEnabled
+        }
+        set {
+            button.isEnabled = newValue
+        }
+    }
+    
     private func sharedInit() {
         layer.masksToBounds = true
         clipsToBounds = true

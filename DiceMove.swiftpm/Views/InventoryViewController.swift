@@ -52,8 +52,7 @@ class InventoryViewController:
         let (category, item, _) = itemForRow(at: indexPath)
         category.currentItem = item
         
-        let keys = Array(category.items.keys)
-        keys.indices.forEach { index in
+        category.ownedItems.indices.forEach { index in
             let indexPath = IndexPath(row: index, section: indexPath.section)
             let isSelected = isSelected(at: indexPath)
             if let cell = tableView.cellForRow(at: indexPath) {

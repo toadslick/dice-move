@@ -26,14 +26,16 @@ struct MoneyView: View {
             .cornerRadius(10)
             
             HStack(alignment: .center, spacing: 3) {
-                ForEach(0..<game.ammoUsed, id: \.self) { _ in
-                    Image(systemName: "die.face.3.fill").imageScale(.large)
-                        .foregroundStyle(.yellow)
-                }
-                ForEach(game.ammoUsed..<game.ammo, id: \.self) { _ in
-                    Image(systemName: "die.face.3").imageScale(.large)
-                        .foregroundStyle(.white)
-                        .opacity(0.75)
+                ForEach(0..<game.ammo, id: \.self) { index in
+                    
+                    let isUsed = index < game.ammoUsed
+                    
+                    Image(systemName: isUsed ? "die.face.3.fill" : "square")
+                        .imageScale(.large)
+                        .foregroundStyle(isUsed ? .yellow : .white)
+                        .opacity(isUsed ? 1 : 0.5)
+                        .animation(.linear, value: isUsed)
+                        .contentTransition(.symbolEffect(.replace))
                 }
             }
             .padding(.horizontal, 10)

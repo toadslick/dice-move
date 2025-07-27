@@ -1,8 +1,13 @@
 import UIKit
+import Combine
 
-class ContentViewController: UIViewController, DiceController.Delegate {
+class ContentViewController: GameSubscribingViewController, DiceController.Delegate {
     
     var titleLabel: UILabel!
+    var inventoryButton: VibrancyButton!
+    var shopButton: VibrancyButton!
+    var spinButton: VibrancyButton!
+    
     var game = Game.shared
     
     override func viewDidLoad() {
@@ -25,22 +30,30 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         titleLabel.numberOfLines = 1
         view.addSubview(titleLabel)
         
-        let inventoryButton = VibrancyButton(frame: .zero)
+        inventoryButton = VibrancyButton(frame: .zero)
         inventoryButton.translatesAutoresizingMaskIntoConstraints = false
-        inventoryButton.setup(title: "Inventory", target: self, action: #selector(inventoryActtion))
+        inventoryButton.setup(title: "Inventory", target: self, action: #selector(inventoryAction))
         view.addSubview(inventoryButton)
 
-        let shopButton = VibrancyButton(frame: .zero)
+        shopButton = VibrancyButton(frame: .zero)
         shopButton.translatesAutoresizingMaskIntoConstraints = false
         shopButton.setup(title: "Shop", target: self, action: #selector(shopAction))
         view.addSubview(shopButton)
-        
+
+        spinButton = VibrancyButton(frame: .zero)
+        spinButton.translatesAutoresizingMaskIntoConstraints = false
+        spinButton.setup(title: "", target: self, action: #selector(spinAction))
+        view.addSubview(spinButton)
+
         let buttonTopSpacing = 30.0
         let buttonSideSpacing = 30.0
         
         NSLayoutConstraint.activate([
             shopButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: buttonTopSpacing),
             shopButton.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: buttonSideSpacing),
+
+            spinButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: buttonTopSpacing),
+            spinButton.leftAnchor.constraint(equalTo: shopButton.rightAnchor, constant: buttonSideSpacing),
 
             inventoryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: buttonTopSpacing),
             inventoryButton.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -buttonSideSpacing),
@@ -59,6 +72,11 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         titleLabel.isHidden = view.frame.width < 700
     }
     
+    override func gameDidChange() {
+        spinButton.title = "Spin: \(Game.shared.spins)"
+        spinButton.isEnabled = Game.shared.canPerformSpin
+    }
+    
     func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
         Game.shared.money += value
 
@@ -72,7 +90,7 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         }
     }
     
-    @objc private func inventoryActtion(sender: UIButton) {
+    @objc private func inventoryAction(sender: UIButton) {
         let controller = InventoryViewController()
         controller.traitOverrides.userInterfaceStyle = .dark
         controller.modalPresentationStyle = .popover
@@ -86,5 +104,11 @@ class ContentViewController: UIViewController, DiceController.Delegate {
         controller.modalPresentationStyle = .popover
         controller.popoverPresentationController?.sourceItem = sender
         present(controller, animated: true)
+    }
+    
+    @objc private func spinAction(sender: UIButton) {
+        if Game.shared.canPerformSpin {
+            let _ = Game.shared.performSpin()
+        }
     }
 }
