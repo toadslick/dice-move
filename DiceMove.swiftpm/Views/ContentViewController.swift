@@ -4,6 +4,7 @@ import Combine
 class ContentViewController: GameSubscribingViewController, DiceController.Delegate {
     
     var titleLabel: UILabel!
+    var luckLabel: UILabel!
     var inventoryButton: VibrancyButton!
     var shopButton: VibrancyButton!
     var spinButton: VibrancyButton!
@@ -23,12 +24,22 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
         titleLabel = UILabel(frame: .zero)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Dice Move"
-        titleLabel.textColor = .white
+        titleLabel.textColor = .label
         titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.isUserInteractionEnabled = false
         titleLabel.numberOfLines = 1
         view.addSubview(titleLabel)
+        
+        luckLabel = UILabel(frame: .zero)
+        luckLabel.translatesAutoresizingMaskIntoConstraints = false
+        luckLabel.text = "Dice Move"
+        luckLabel.textColor = .systemGreen
+        luckLabel.font = .preferredFont(forTextStyle: .body)
+        luckLabel.textAlignment = .center
+        luckLabel.isUserInteractionEnabled = false
+        luckLabel.numberOfLines = 1
+        view.addSubview(luckLabel)
         
         inventoryButton = VibrancyButton(frame: .zero)
         inventoryButton.translatesAutoresizingMaskIntoConstraints = false
@@ -60,6 +71,9 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
             
             titleLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             titleLabel.centerYAnchor.constraint(equalTo: inventoryButton.centerYAnchor),
+            
+            luckLabel.centerXAnchor.constraint(equalTo: spinButton.centerXAnchor),
+            luckLabel.topAnchor.constraint(equalToSystemSpacingBelow: spinButton.bottomAnchor, multiplier: 1),
 
             diceController.view.topAnchor.constraint(equalTo: view.topAnchor),
             diceController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -73,12 +87,19 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
     }
     
     override func gameDidChange() {
-        spinButton.title = "Spin: \(Game.shared.spins)"
-        spinButton.isEnabled = Game.shared.canPerformSpin
+        spinButton.title = "Spin: \(game.spins)"
+        spinButton.isEnabled = game.canPerformSpin
+        
+        if game.luckSpins > 0 {
+            luckLabel.isHidden = false
+            luckLabel.text = "\(game.luckMultiplier)× for \(game.luckSpins) spins"
+        } else {
+            luckLabel.isHidden = true
+        }
     }
     
     func die(_ die: Die, didStopOn value: Int, at point: CGPoint) {
-        Game.shared.money += value
+        game.money += value
 
         DispatchQueue.main.async { [weak self] in
             guard
@@ -107,8 +128,8 @@ class ContentViewController: GameSubscribingViewController, DiceController.Deleg
     }
     
     @objc private func spinAction(sender: UIButton) {
-        if Game.shared.canPerformSpin {
-            let _ = Game.shared.performSpin()
+        if game.canPerformSpin {
+            let _ = game.performSpin()
         }
     }
 }

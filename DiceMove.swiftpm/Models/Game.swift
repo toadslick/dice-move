@@ -137,7 +137,7 @@ class Game: NSObject, ObservableObject {
     
     public private(set) var luckMultiplier: Int {
         get {
-            max(UserDefaults.standard.integer(forKey: StorageKey.ammo.rawValue), defaultLuck)
+            max(UserDefaults.standard.integer(forKey: StorageKey.luckMultiplier.rawValue), defaultLuck)
         }
         set {
             UserDefaults.standard.set(newValue, forKey: StorageKey.luckMultiplier.rawValue)

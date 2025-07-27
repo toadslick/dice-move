@@ -19,7 +19,7 @@ enum Rarity: String, RawRepresentable {
     ]
     
     static func random(luckMultiplier: Int = 1) -> Rarity {
-        let n = Float.random(in: 0..<1) * Float(luckMultiplier)
+        let n = Float.random(in: 0..<1) / Float(luckMultiplier)
         for rarity in testOrder {
             if n <= rarity.frequency {
                 return rarity
