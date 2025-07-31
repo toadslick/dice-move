@@ -24,7 +24,10 @@ class Loot {
             "Acid": .rare,
             "Nebula": .epic,
             "Spark": .legendary,
-        ]
+            "Indigo": .common,
+            "Fuzzy": .epic,
+            "INFERNO!": .impossible,
+                    ]
     )
     
     static let trails: Loot = .init(
@@ -49,7 +52,9 @@ class Loot {
             "Cedar": .common,
             "Water": .uncommon,
             "Space": .rare,
-        ]
+            "Hard metal": .uncommon,
+            "Doges": .legendary,
+                ]
     )
     
     static let auras: Loot = .init(
